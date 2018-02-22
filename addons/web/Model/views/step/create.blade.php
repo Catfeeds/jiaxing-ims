@@ -1,0 +1,216 @@
+<form method="post" action="{{url()}}" id="myform" name="myform">
+
+<div class="panel">
+    <table class="table table-form">
+        <tr>
+            <td align="right" width="15%">进程名称<span class="red">*</span></td>
+            <td>
+                <input type="text" id="name" name="name" value="{{$row->name}}" class="form-control input-sm input-inline">
+            </td>
+        </tr>
+        
+        <tr>
+            <td align="right">进程序号 <span class="red">*</span></td>
+            <td>
+                <input type="text" id="number" name="number" value="{{$row->number}}" class="form-control input-sm input-inline">
+            </td>
+        </tr>
+
+        <tr>
+            <td align="right">下一进程</td>
+            <td>
+                @foreach($steps as $step)
+                    <label class="checkbox-inline"><input name="join[]" type="checkbox" id="join_{{$step->number}}" value="{{$step->number}}" @if($step->number == $row->number) disabled @endif @if(in_array($step->number, $row->join)) checked @endif><span class="badge">{{$step->number}}</span> {{$step->name}}</label>
+                @endforeach
+            </td>
+        </tr>
+
+        <tr>
+            <td align="right">进程类型</td>
+            <td class="form-inline">
+                <select class="form-control input-sm input-inline" name="type" id="type">
+                    <option value="start" @if($row->type == 'start') selected @endif>开始</option>
+                    <option value="end" @if($row->type == 'end') selected @endif>结束</option>
+                    <option value="done" @if($row->type == 'done') selected @endif>完成</option>
+                    <option value="leader" @if($row->type == 'leader') selected @endif>直属领导</option>
+                    <option value="manager" @if($row->type == 'manager') selected @endif>部门负责人</option>
+                    <option value="owner" @if($row->type == 'owner') selected @endif>负责人</option>
+                    <option value="customer_owner" @if($row->type == 'customer_owner') selected @endif>客户负责人</option>
+                    <option value="user" @if($row->type == 'user') selected @endif>指定办理人</option>
+                    <option value="role" @if($row->type == 'role') selected @endif>指定角色</option>
+                    <option value="created_by" @if($row->type == 'created_by') selected @endif>单据创建者</option>
+                    <option value="field" @if($row->type == 'field') selected @endif>指定字段</option>
+                    <option value="position" @if($row->type == 'position') selected @endif>职位</option>
+                </select>
+
+                <span id="type_user" class="type" style="display:none;">
+                    {{Dialog::user('user','type_value[user]', $row->type_value, 1, 0)}}
+                </span>
+
+                <span id="type_role" class="type" style="display:none;">
+                    {{Dialog::user('role','type_value[role]', $row->type_value, 1, 0)}}
+                </span>
+
+                <span id="type_field" class="type" style="display:none;">
+                    <select class="form-control input-sm" name="type_value[field]">
+                        @if($columns[$model->table]['fields'])
+                        @foreach($columns[$model->table]['fields'] as $column)
+                            <option value="{{$column->field}}" @if($row->type_value == $column->field) selected @endif>{{$column->name}}</option>
+                        @endforeach
+                        @endif
+                    </select>
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td align="right">颜色</td>
+            <td>
+                <select class="form-control input-sm input-inline" name="color">
+                    @foreach($colors as $color)
+                        <option value="{{$color}}" class="bg-{{$color}}" @if($row->color == $color) selected @endif>{{$color}}</option>
+                    @endforeach
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td align="right">提醒</td>
+            <td>
+                <label class="checkbox-inline"><input name="notify[sms]" type="checkbox" id="notify-sms" value="1" @if($row->notify['sms'] == 1) checked @endif>下一步 [短信]</label>
+            </td>
+        </tr>
+
+        <tr>
+            <td align="right">提醒内容</td>
+            <td>
+                <input type="text" id="notify-text" name="notify[text]" value="{{$row->notify['text']}}" class="form-control input-sm">
+            </td>
+        </tr>
+
+        <tr>
+            <td align="right">退回</td>
+            <td>
+                <select class="form-control input-sm input-inline" name="back" id="back">
+                    <option value="0" @if($row->back == 0) selected @endif>无</option>
+                    <option value="1" @if($row->back == '1') selected @endif>上一步</option>
+                </select>
+            </td>
+        </tr>
+
+    </table>
+</div>
+
+<div class="panel">
+<table class="table table-form">
+<tr>
+    <td>名称</td>
+    <td>字段</td>
+    <td>字段可写</td>
+    <td>字段保密</td>
+    <td>验证规则</td>
+</tr>
+
+<tr>
+    <td>
+        <span class="label label-primary">公共附件</span>
+    </td>
+    <td>
+        @attachment
+    </td>
+    <td>
+        <input type="checkbox" @if($row->field['@attachment']['p'] == 'W') checked @endif data-key="{{$table}}_{{$field->field}}" class="field-edit" id="{{$table}}_{{$field->field}}_edit" name="field[@attachment][p]" value="W">
+    </td>
+    <td>
+        <input type="checkbox" @if($row->field['@attachment']['p'] == 'S') checked @endif data-key="{{$table}}_{{$field->field}}" class="field-secret" id="{{$table}}_{{$field->field}}_secret" name="field[@attachment][p]" value="S">
+    </td>
+    <td>
+        无
+    </td>
+</tr>
+
+@foreach($columns as $table => $column)
+
+@foreach($column['fields'] as $field)
+<tr>
+    <td>
+        @if($column['master'] == 0)
+            <span class="label label-info">子表</span>
+        @endif
+        {{$field->name}}
+    </td>
+    <td>
+        {{$table}}.{{$field->field}}
+    </td>
+    <td>
+        <input type="checkbox" @if($row->field[$table][$field->field]['p'] == 'W') checked @endif class="field-edit" data-key="{{$table}}_{{$field->field}}" id="{{$table}}_{{$field->field}}_edit" name="field[{{$table}}][{{$field->field}}][p]" value="W">
+    </td>
+    <td>
+        <input type="checkbox" @if($row->field[$table][$field->field]['p'] == 'S') checked @endif class="field-secret" data-key="{{$table}}_{{$field->field}}" id="{{$table}}_{{$field->field}}_secret" name="field[{{$table}}][{{$field->field}}][p]" value="S">
+    </td>
+    <td>
+        @if($field['form_type'] == 'auto')
+            <label title="锁定将不允许修改宏控件的值">
+                <input type="checkbox" value="1" @if($row->field[$table][$field->field]['m'] == 1) checked @endif name="field[{{$table}}][{{$field->field}}][m]"> 锁定
+            </label>
+        @else
+        <select class="form-control input-sm input-inline" name="field[{{$table}}][{{$field->field}}][v]">
+            <option value=""></option>
+            @foreach($regulars as $key => $regular)
+                <option @if($row->field[$table][$field->field]['v'] == $key) selected @endif value="{{$key}}">{{$regular['name']}}</option>
+            @endforeach
+        </select>
+        @endif
+    </td>
+</tr>
+
+@endforeach
+@endforeach
+
+</table>
+</div>
+
+<div class="panel">
+    <table class="table table-form m-b-none">
+        <tr>
+            <td>
+                <input type="hidden" name="id" value="{{$row->id}}">
+                <input type="hidden" name="model_id" value="{{$model->id}}">
+                <button type="submit" class="btn btn-success"><i class="fa fa-check-circle"></i> 保存</button>
+                <button type="button" onclick="history.back();" class="btn btn-default">返回</button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+</form>
+
+<script type="text/javascript">
+$(function() {
+    
+    userType('{{$row->type}}');
+    $('#type').on('change', function() {
+        userType(this.value);
+    });
+
+    /*
+    $('.field-edit').on('click', function() {
+        var key = $(this).data('key');
+        $('#' + key + '_secret').prop('disabled', this.checked);
+    });
+
+    $('.field-secret').on('click', function() {
+        var key = $(this).data('key');
+        $('#' + key + '_edit').prop('disabled', this.checked);
+    });
+    */
+
+});
+
+function userType(type) {
+    type = type || '';
+    $('.type').hide().prop('disabled', true);
+    $('#type_' + type).show().prop('disabled', false);
+}
+
+</script>
