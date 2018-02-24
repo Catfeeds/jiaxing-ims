@@ -1,4 +1,6 @@
-<div class="panel">
+<div class="panel no-border">
+
+@include('menu')
 
     <div class="wrapper">
  

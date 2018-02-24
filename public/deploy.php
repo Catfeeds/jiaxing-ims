@@ -3,10 +3,10 @@
 error_reporting(1);
 
 // 建立镜像仓库
-// sudo -Hu www git clone --mirror git@git.sc35.com:hawind/shenghua-oa-web.git
+// sudo -Hu www git clone --mirror git@git.sc35.com:hawind/jiaxing-ims-web.git
 
-$git = '/www/git/deploy/shenghua-oa-web.git';
-$web = '/www/htdocs/shenghua.app';
+$git = '/www/git/deploy/jiaxing-ims-web.git';
+$web = '/www/htdocs/ims.dp-jx.com';
  
 $token    = '1GpLHbLvtDuTPkWd';
 $wwwUser  = 'www';

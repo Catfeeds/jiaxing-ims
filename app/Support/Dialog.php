@@ -130,7 +130,7 @@ class Dialog
         return join("\n", $html);
     }
 
-    public function user($item, $name, $value = '', $multi = 0, $readonly = 0, $width = 'auto')
+    public function select2($item, $name, $value = '', $multi = 0, $readonly = 0, $width = 'auto')
     {
         $rows = '';
 
@@ -180,6 +180,56 @@ class Dialog
             //$html[] = '<div class="input-group-btn">';
             //$html[] = '<button type="button" onclick="'.$option .'" class="btn btn-sm btn-default"><i class="fa '.$arrow.'"></i></button>';
             //$html[] = '</div>';
+        } else {
+            $html[] = '<div class="form-control input-sm" id="'.$id.'_text">'.$rows.'</div><input type="hidden" id="'.$id.'" name="'.$name.'" value="'.$value.'">';
+        }
+        return join("\n", $html);
+    }
+
+    public function user($item, $name, $value = '', $multi = 0, $readonly = 0, $width = 'auto')
+    {
+        $rows = '';
+
+        $dialog = self::$items[$item];
+
+        if ($value) {
+            $ids = explode(',', $value);
+
+            $table = $dialog['table'];
+            $join = $dialog['join'];
+
+            if ($join) {
+                $rows = DB::table($table)
+                ->LeftJoin('user', 'user.id', '=', $table.'.user_id')
+                ->whereIn($table.'.id', $ids)
+                ->pluck($dialog['field'])->implode(',');
+            } else {
+                $rows = DB::table($table)
+                ->whereIn('id', $ids)
+                ->pluck($dialog['field'])->implode(',');
+            }
+        }
+
+        $id = str_replace(['[',']'], ['_',''], $name);
+
+        if ($readonly == 0) {
+            $html[] = '<div class="select-group input-group">';
+        } else {
+            $html[] = '<div class="select-group">';
+        }
+
+        if ($readonly == 0) {
+            $arrow  = $multi == 0 ? 'fa-caret-down' : 'fa-caret-down';
+            $option = "dialogUser('$dialog[title]','$dialog[url]','$id','$multi');";
+            $clear  = "selectClear('$id');";
+
+            $width  = is_numeric($width) ? 'width:'.$width.'px;' : '';
+
+            $html[] = '<div class="form-control input-sm" onclick="'.$option .'" style="'.$width.';cursor:pointer;" id="'.$id.'_text">'.$rows.'</div>';
+            $html[] = '<div class="input-group-btn">';
+            $html[] = '<button type="button" onclick="'.$option .'" class="btn btn-sm btn-default"><i class="fa '.$arrow.'"></i></button>';
+            $html[] = '</div>';
+            $html[] = '<input type="hidden" id="'.$id.'" name="'.$name.'" value="'.$value.'">';
         } else {
             $html[] = '<div class="form-control input-sm" id="'.$id.'_text">'.$rows.'</div><input type="hidden" id="'.$id.'" name="'.$name.'" value="'.$value.'">';
         }

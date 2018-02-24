@@ -19,7 +19,7 @@ class Department extends BaseModel
         static $data = null;
 
         if ($data === null) {
-            $data = Department::orderBy('lft', 'asc')->get(['id', 'parent_id', 'title'])->toNested('title');
+            $data = Department::orderBy('lft', 'asc')->get(['id', 'parent_id', 'name'])->toNested('name');
             //$data = DB::table('department')->get(['id','title']);
             //$data = array_by($data);
         }

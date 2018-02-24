@@ -13784,7 +13784,7 @@ a.label { color: #fff; }
 }
 .navbar-brand .fa { font-size: 20px; }
 
-.icon, label {
+.icon {
     font-weight: 400;
 }
 
@@ -14078,6 +14078,41 @@ a.label { color: #fff; }
     background:#fff; 
     border:1px solid #ccc;
 }
+
+/**
+ * select2 插件相关css
+ */
+
+.select2-container--focus .select2-selection {
+    border: 1px solid #0e90d2;
+}
+.select2-container--open .select2-selection {
+    border: 1px solid #0e90d2;
+    border-bottom: 1px solid #ccc !important;
+}
+.select2-container--open .select2-dropdown {
+    border: 1px solid #0e90d2;
+    border-top: 0;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid #ccc;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:active,
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    outline: 0;
+    /*
+    border-color: #66afe9;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 6px rgba(102,175,233,.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 6px rgba(102,175,233,.6);
+    */
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #0e90d2;
+}
+
 
 /**
  * chosen 插件相关css

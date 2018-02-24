@@ -151,6 +151,7 @@ function search_form($params = [], $columns = [], $orders = [])
             $forms['field'][$i]     = $field;
             $forms['condition'][$i] = $query['condition'][$i];
             $forms['search'][$i]    = $query['search'][$i];
+            $forms['type'][$i]      = $columns[$i][0];
 
             $where[$i]['field']     = $field;
             $where[$i]['condition'] = $query['condition'][$i];
@@ -179,6 +180,7 @@ function search_form($params = [], $columns = [], $orders = [])
             $forms['field'][$i]     = $column[1];
             $forms['condition'][$i] = '';
             $forms['search'][$i]    = empty($column[3]) ? '' : $column[3];
+            $forms['type'][$i]      = $column[0];
         }
     }
 

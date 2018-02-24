@@ -3499,7 +3499,8 @@ S2.define('select2/data/ajax',[
       self._request = $request;
     }
 
-    if (this.ajaxOptions.delay && params.term != null) {
+    if (this.ajaxOptions.delay) {
+        // if (this.ajaxOptions.delay && params.term != null) {
       if (this._queryTimeout) {
         window.clearTimeout(this._queryTimeout);
       }
@@ -3968,6 +3969,7 @@ S2.define('select2/dropdown/search',[
     });
 
     container.on('results:all', function (params) {
+
       if (params.query.term == null || params.query.term === '') {
         var showSearch = self.showSearch(params);
 
@@ -5323,6 +5325,7 @@ S2.define('select2/core',[
   Select2.prototype._registerEvents = function () {
     var self = this;
 
+    self.lastPage    = 1;
     self.lastResults = null;
     self.lastTerm    = null;
 
@@ -5347,35 +5350,60 @@ S2.define('select2/core',[
     });
 
     this.on('query', function (params) {
+
       if (!self.isOpen()) {
         self.trigger('open', {});
+
+        // 单选设置输入值
+        if(self.dropdown.$search !== undefined) {
+            self.dropdown.$search.val(self.lastTerm);
+        }
       }
 
       // 改造搜索前显示
-      if(self.lastResults && (params.term == undefined || params.term == self.lastTerm)) {
+      if(self.lastResults && params.term == undefined) {
+
+        params.page = self.lastPage;
+
         self.trigger('results:all', {
             data: self.lastResults,
             query: params
         });
+
       } else {
-        this.dataAdapter.query(params, function (data) {
+            self.lastTerm = params.term;
+            self.lastPage = 1;
+            this.dataAdapter.query(params, function (data) {
             self.lastResults = data;
             self.trigger('results:all', {
               data: data,
               query: params
             });
-
           });
       }
+
     });
 
     this.on('query:append', function (params) {
-      this.dataAdapter.query(params, function (data) {
-        self.trigger('results:append', {
-          data: data,
-          query: params
-        });
-      });
+
+        if(self.lastPage < params.page) {
+
+            self.lastPage = params.page;
+
+            this.dataAdapter.query(params, function (data) {
+                
+                $.each(data.results, function(k, v) {
+                    self.lastResults.results.push(v);
+                });
+                self.lastResults.pagination.more = data.pagination.more;
+
+                self.trigger('results:append', {
+                  data: data,
+                  query: params
+                });
+              });
+        }
+      
     });
 
     this.on('keypress', function (evt) {

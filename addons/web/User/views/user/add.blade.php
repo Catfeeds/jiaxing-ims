@@ -56,7 +56,7 @@
                 <option value=""> - </option>
                 @if(count($positions))
                 @foreach($positions as $position)
-                    <option value="{{$position->id}}" @if($row->post ==$position->id) selected @endif>{{$position->title}}</option>
+                    <option value="{{$position->id}}" @if($row->post ==$position->id) selected @endif>{{$position->name}}</option>
                 @endforeach
                 @endif
             </select>
@@ -85,8 +85,8 @@
         <td align="left">
             {{Dialog::user('user','leader_id', $row->leader_id, 0, 0)}}
         </td>
-        <td align="right">人事资料</td>
-        <td align="left"></td>
+        <td align="right">所属门店</td>
+        <td align="left">{{Dialog::user('store','store_id', $row->store_id, 0, 0)}}</td>
     </tr>
     <tr>
         <td align="right">账号状态</td>

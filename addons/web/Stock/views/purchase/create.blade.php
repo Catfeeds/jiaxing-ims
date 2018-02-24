@@ -2,37 +2,127 @@
 
 @include('purchase/menu')
 
-<script>
+<div class="wrapper-sm">
+    <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
+    <a class="btn btn-sm btn-info" href="javascript:_submit();"> <i class="fa fa-check"></i> 提交</a>
+</div>
+<div class="wrapper-sm b-t">
+
+<form method="post" enctype="multipart/form-data" action="{{url()}}" id="myform" name="myform">
+
+<div class="form-inline">
+    <div class="row">
+    <div class="form-group">
+        <div class="col-sm-12">
+            <label for="sort" class="control-label"><span class="red"> * </span> 供应商</label>
+            {{Dialog::select2('supplier','supplier_id', $row->supplier_id, 0, 0)}}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <label for="sort" class="control-label"><span class="red"> * </span> 单据日期</label>
+            <input type="text" name="date" data-toggle="date" value="{{date('Y-m-d')}}" id="date" class="form-control input-sm">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <label for="sort" class="control-label">单据编号</label>
+            <input type="text" name="sn" readonly="readonly" id="sn" value="{{date('YmdHis')}}" class="form-control input-sm">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <label for="sort" class="control-label"><span class="red"> * </span> 采购员</label>
+            {{Dialog::select2('user','buyer', $row['buyer'], 0, 0)}}
+        </div>
+    </div>
+</div>
+</div>
+
+    <div id="jqgrid-editor-container" class="m-t m-b">
+        <table id="grid-table"></table>
+    </div>
+
+    <div class="form-group">
+        <textarea class="form-control" type="text" name="remark" id="remark" placeholder="暂无备注">{{$row['remark']}}</textarea>
+    </div>
+
+    <div class="form-inline">
+    <div class="row">
+    <div class="form-group">
+    <div class="col-sm-12">
+    <label for="sort" class="control-label">应收金额</label>
+    <input type="text" name="rec_money" readonly="readonly" value="{{$row['rec_money']}}" id="rec_money" class="form-control input-sm money">
+    </div></div>
+    <div class="form-group">
+    <div class="col-sm-12">
+    <label for="sort" class="control-label"><span class="red"> * </span> 优惠金额</label>
+    <input type="text" name="discount_money" id="discount_money" value="{{$row['discount_money']}}" class="form-control input-sm money">
+    </div></div>
+    <div class="form-group">
+    <div class="col-sm-12">
+    <label for="sort" class="control-label"><span class="red"> * </span> 本次付款</label>
+    <input type="text" name="pay_money" id="pay_money" value="{{$row['pay_money']}}" class="form-control input-sm money">
+    </div></div>
+    <div class="form-group">
+    <div class="col-sm-12">
+    <label for="sort" class="control-label">本次欠款</label>
+    <input type="text" name="arear_money" id="arear_money" readonly="readonly" value="{{$row['arear_money']}}" class="form-control input-sm money">
+    </div></div>
+</div>
+</div>
+
+<input type="hidden" name="quantity" id="total_quantity" value="0" />
+
+</form>
+
+</div>
+
+<script type="text/javascript">
 
 var t = null;
-var validate = {{json_encode($validate)}};
+var columns = {{json_encode($columns)}};
+var select2List = {};
+var rec_money = 0.00;
 
 $(function() {
 
-    $("#user_id").select2Field({
+    select2List.buyer = $("#buyer");
+    select2List.buyer.select2Field({
         width: '153px',
+        //multiple: true,
         ajax: {
             url: '/user/user/dialog'
         }
     });
 
-    $("#supplier_id").select2Field({
+    select2List.supplier_id = $("#supplier_id");
+    select2List.supplier_id.select2Field({
         ajax: {
             url: '/stock/supplier/dialog'
         }
     });
 
-    var models = {{json_encode($models)}};
+    var footerCalculate = function(rowid) {
 
-    var footerCalculate = function() {
+        var price = $(this).jqGrid('getCell', rowid, 'price');
+        var quantity = $(this).jqGrid('getCell', rowid, 'quantity');
+        $(this).jqGrid('setCell', rowid, 'money', quantity * price);
+        
         var quantity = $(this).getCol('quantity', false, 'sum');
-        $(this).footerData('set',{product_name:'合计:', quantity: quantity});
+        var money = $(this).getCol('money', false, 'sum');
+        
+        $('#total_quantity').val(quantity);
+
+        sumMoney(money, 'rec');
+
+        $(this).footerData('set',{product_name:'合计:', quantity: quantity, money: money});
     }
 
     t = $('#grid-table').jqGrid({
         caption: '',
         datatype: 'local',
-        colModel: models,
+        colModel: columns,
         cellEdit: true,
         cellsubmit: 'clientArray',
         cellurl: '',
@@ -58,47 +148,43 @@ $(function() {
                         dataInit: $.jgrid.celledit.dialog({
                             srcField: 'product_id',
                             mapField: {
-                                month_1:'month_1',
-                                month_2:'month_2',
-                                month_3:'month_3',
-                                month_4:'month_4',
-                                month_5:'month_5',
-                                month_6:'month_6',
-                                spec:'spec', 
+                                category_name:'category_name',
+                                warehouse_name:'warehouse_name',
+                                warehouse_id:'warehouse_id',
+                                product_spec:'spec', 
                                 product_id:'id',
-                                stock_total:'stock_total',
-                                product_name:'text',
-                                supplier_id:'supplier_id',
-                                supplier_name:'',
-                                quantity: 'budget',
+                                product_name:'name',
+                                product_code:'barcode',
+                                product_spec:'spec',
+                                last_price:'last_price',
                             },
                             suggest: {
-                                url: 'product/product/dialog_jqgrid',
-                                params: {yonyou:'a',owner_id:'{{auth()->id()}}', type: 2, order:'asc', limit:1000}
+                                url: 'stock/product/dialog',
+                                params: {order:'asc', limit:1000}
                             },
                             dialog: {
                                 title: '商品管理',
-                                url: 'product/product/dialog_jqgrid',
-                                params: {yonyou:'a',owner_id:'{{auth()->id()}}', type: 2}
+                                url: 'stock/product/dialog',
+                                params: {}
                             }
                         })
                     }
                 });
             }
 
-            if(cellname == 'supplier_name') {
+            if(cellname == 'warehouse_name') {
                 t.setColProp(cellname, {
                     editoptions: {
                         dataInit: $.jgrid.celledit.dropdown({
                             mapField: {
-                                supplier_id:'id',
+                                warehouse_id:'id',
                             },
                             valueField: 'id',
                             textField: 'text',
                             suggest: {
-                                url: 'supplier/product/suppliers',
+                                url: 'stock/warehouse/dialog',
                                 cache: false,
-                                params: {product_id:row.product_id}
+                                params: {warehouse_id:row.warehouse_id}
                             }
                         })
                     }
@@ -118,39 +204,58 @@ $(function() {
         afterSaveCell: function(rowid, cellname, value, iRow, iCol) {
 
             // 计算页脚数据
-            footerCalculate.call(this);
+            footerCalculate.call(this, rowid);
 
             // 编辑cell后保存时删除class
             $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
         }
     });
 
-    /*
-    t.jqGrid('setGroupHeaders', {
-        useColSpanStyle: true, //没有表头的列是否与表头列位置的空单元格合并
-        groupHeaders: [{
-            startColumnName: 'month_1',
-            numberOfColumns: 3,
-            titleText: '去年包材使用量'
-        },{
-            startColumnName: 'month_4',
-            numberOfColumns: 2,
-            titleText: '本年包材使用量'
-        }]
-    });
-    */
     // 初始化行数据
     for(var i=1; i <= 10; i++) {
         t.jqGrid('addRowData', i, {});
     }
+
+    // 监听金额改变
+    $('input.money').on('input propertychange', function() {
+
+        var money = $(this).val();
+        if(this.id == 'discount_money') {
+            sumMoney(money, 'discount');
+        }
+        if(this.id == 'pay_money') {
+            sumMoney(money, 'pay');
+        }
+    });
+
 });
 
-/* 
- * 提交数据
-*/
+function sumMoney(money, type) {
+    if(type == 'rec') {
+        $('#rec_money').val(money);
+        $('#pay_money').val(money);
+        $('#discount_money').val(0);
+        $('#arear_money').val(0);
+    }
+    if(type == 'pay') {
+        var rec       = $('#rec_money').val();
+        var discount  = $('#discount_money').val();
+        $('#arear_money').val(rec - money - discount);
+    }
+    if(type == 'discount') {
+        var rec = $('#rec_money').val();
+        $('#pay_money').val(rec - money);
+        $('#arear_money').val(0);
+    }
+}
+
 function _submit() {
 
-    var data = [];
+    var params = {};
+
+    $.each(select2List, function(k, v) {
+        params[k] = v.select2('val');
+    });
 
     var dataset = t.jqGrid('getRowsData');
     if(dataset.v === true) {
@@ -158,16 +263,20 @@ function _submit() {
             $.toastr('error', '商品不能为空。', '错误');
             return;
         } else {
-            data = dataset.data;
+            params.purchase_line = dataset.data;
         }
     } else {
         return;
     }
 
     var query = $('#myform').serialize();
-    $.post('{{url("create")}}', query + '&' + $.param({datas: data}), function(res) {
+    $.post('{{url("create")}}', query + '&' + $.param(params), function(res) {
         if(res.status) {
-            location.href = res.data;
+            $.messager.alert('提醒', res.data, function() {
+                location.href = res.url;
+            });
+        } else {
+            $.toastr('error', res.data);
         }
     });
 }
@@ -184,81 +293,7 @@ function iframeResize() {
     // resize jqgrid大小
     t.jqGrid('resizeGrid');
 }
-
 </script>
-
-<div class="wrapper-sm">
-    <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
-    <a class="btn btn-sm btn-info" href="javascript:actionLink('filter');"> <i class="fa fa-check"></i> 提交</a>
-</div>
-<div class="wrapper-sm b-t">
-
-<form method="post" enctype="multipart/form-data" action="{{url()}}" id="myform" name="myform">
-
-<div class="form-inline">
-    <div class="row">
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label">供应商</label>
-            {{Dialog::user('supplier','supplier_id', $row->supplier_id, 0, 0)}}
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label">单据日期</label>
-            <input type="text" name="date" data-toggle="date" value="{{date('Y-m-d')}}" id="date" class="form-control input-sm">
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label">单据编号</label>
-            <input type="text" name="user" readonly="readonly" id="user" value="{{Auth::user()->nickname}}" class="form-control input-sm">
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label">制单人</label>
-            {{Dialog::user('user','user_id', $row['user_id'], 0, 0)}}
-        </div>
-    </div>
-</div>
-</div>
-
-    <div id="jqgrid-editor-container" class="m-t m-b">
-        <table id="grid-table"></table>
-    </div>
-
-    <div class="form-group">
-        <textarea class="form-control" type="text" name="remark" id="remark" placeholder="暂无备注">{{$row['remark']}}</textarea>
-    </div>
-
-    <div class="form-inline">
-    <div class="row">
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label">应收金额</label>
-    <input type="text" name="date" readonly="readonly" value="" id="date" class="form-control input-sm">
-    </div></div>
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label">优惠金额</label>
-    <input type="text" name="user" id="user" value="" class="form-control input-sm">
-    </div></div>
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label">本次付款</label>
-    <input type="text" name="user" id="user" value="" class="form-control input-sm">
-    </div></div>
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label">本次欠款</label>
-    <input type="text" name="user" id="user" readonly="readonly" value="" class="form-control input-sm">
-    </div></div>
-</div></div>
-
-</form>
-
-</div>
 
 <!--
 <div class="panel-footer">

@@ -27,6 +27,23 @@ return [
                 ]
             ]
         ],
+        "store" => [
+            "name" => "门店",
+            "actions" => [
+                "index" => [
+                    "name" => "列表"
+                ],
+                "create" => [
+                    "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
         "mail" => [
             "name" => "邮件设置",
             "actions" => [

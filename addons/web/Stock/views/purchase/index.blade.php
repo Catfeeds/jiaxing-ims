@@ -1,14 +1,19 @@
 <div class="panel no-border">
 
+    @include('purchase/menu')
+
     <div class="wrapper-sm">
 
         <div class="btn-group">
+            <!--
             <a class="btn btn-sm btn-default" href="javascript:actionLink('create');"><i class="fa fa-plus"></i> 新建</a>
             <a class="btn btn-sm btn-default" href="javascript:actionLink('edit');"><i class="fa fa-edit"></i> 编辑</a>
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('delete');"><i class="fa fa-remove"></i> 删除</a>
+            -->
+            <a class="btn btn-sm btn-default" href="javascript:actionLink('delete');"><i class="fa fa-remove"></i> 作废</a>
         </div>
-
+        <!--
         <a class="btn btn-sm btn-default" href="javascript:actionLink('export');"><i class="fa fa-share"></i> 导出</a>
+        -->
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
     
     </div>
@@ -19,7 +24,7 @@
         </form>
     </div>
     
-    <div class="hidden-xs">
+    <div class="hidden-xs b-t">
         <form id="search-form-simple" class="search-form form-inline" action="{{url()}}" method="get">
             @include('searchForm3')
         </form>
@@ -34,12 +39,12 @@
 
 <script>
 var routes = {
-    index: 'stock/warehouse/index',
-    create: 'stock/warehouse/create',
-    delete: 'stock/warehouse/delete',
-    edit: 'stock/warehouse/edit',
-    show: 'stock/warehouse/show',
-    export: 'stock/warehouse/export',
+    index: 'stock/purchase/index',
+    create: 'stock/purchase/create',
+    delete: 'stock/purchase/delete',
+    edit: 'stock/purchase/edit',
+    show: 'stock/purchase/show',
+    export: 'stock/purchase/export',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};
@@ -95,7 +100,7 @@ var searchSimple = null;
         height: getPanelHeight(),
         footerrow: false,
         postData: params,
-        //pager: '#jqgrid-page',
+        pager: '#jqgrid-page',
         ondblClickRow: function(rowid) {
             var row = $(this).getRowData(rowid);
             actionLink('edit', row.id);
@@ -220,7 +225,7 @@ function actionLink(action, id) {
 
 function getPanelHeight() {
     var list = $('.list-jqgrid').position();
-    return top.iframeHeight - list.top - 42;
+    return top.iframeHeight - list.top - 92;
 }
 
 $(window).on('resize', function() {

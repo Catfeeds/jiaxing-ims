@@ -28,6 +28,7 @@ class Menu extends BaseModel
             ['id' =>'stock_supplier', 'parent' => 'stock', 'name' => '供应商管理', 'url' => 'stock/supplier/index'],
             ['id' =>'stock_warehouse', 'parent' => 'stock', 'name' => '仓库管理', 'url' => 'stock/warehouse/index'],
             ['id' =>'stock_product', 'parent' => 'stock', 'name' => '商品管理', 'url' => 'stock/product/index'],
+            ['id' =>'stock_service', 'parent' => 'stock', 'name' => '服务管理', 'url' => 'stock/service/index'],
         
             ['id' =>'setting', 'name' => '设置', 'icon' => 'fa-gear'],
             ['id' =>'setting_setting', 'parent' => 'setting', 'name' => '系统设置', 'url' => 'setting/setting/index'],

@@ -19,7 +19,7 @@
         </form>
     </div>
     
-    <div class="hidden-xs">
+    <div class="hidden-xs b-t">
         <form id="search-form-simple" class="search-form form-inline" action="{{url()}}" method="get">
             @include('searchForm3')
         </form>

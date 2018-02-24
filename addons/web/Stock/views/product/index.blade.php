@@ -1,90 +1,231 @@
-<div class="panel">
+<div class="panel no-border">
 
-    <div class="panel-heading tabs-box">
-        <ul class="nav nav-tabs">
-            <li class="@if($query['status'] == 1) active @endif">
-                <a class="text-sm" href="{{url('',['status' => 1, 'advanced' => $query['advanced']])}}">正常</a>
-            </li>
-            <li class="@if($query['status'] == 0) active @endif">
-                <a class="text-sm" href="{{url('',['status' => 0, 'advanced' => $query['advanced']])}}">禁用</a>
-            </li>
-        </ul>
+    @include('menus/product')
+
+    <div class="wrapper-sm">
+
+        <div class="btn-group">
+            <a class="btn btn-sm btn-default" href="javascript:actionLink('create');"><i class="fa fa-plus"></i> 新建</a>
+            <a class="btn btn-sm btn-default" href="javascript:actionLink('edit');"><i class="fa fa-edit"></i> 编辑</a>
+            <a class="btn btn-sm btn-default" href="javascript:actionLink('delete');"><i class="fa fa-remove"></i> 删除</a>
+        </div>
+
+        <a class="btn btn-sm btn-default" href="javascript:actionLink('export');"><i class="fa fa-share"></i> 导出</a>
+        <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
+    
     </div>
-
-    <div class="wrapper">
-        @include('product/query')
+        
+    <div style="display:none;">
+        <form id="search-form-advanced" class="search-form" action="{{url()}}" method="get">
+            @include('searchForm4')
+        </form>
     </div>
-
-<form method="post" id="myform" name="myform">
-<div class="table-responsive">
-<table class="table m-b-none table-hover">
-    <tr>
-    <th align="center">
-        <input class="select-all" type="checkbox">
-    </th>
-    <th align="left">名称</th>
-    <th align="left">规格</th>
-    <th align="left">条码 </th>
-    <th align="left">编码</th>
-    <th>单位</th>
-    <th align="right">销售价</th>
-    <th align="center">排序</th>
-    <th align="center">ID</th>
-    <th align="center"></th>
-	</tr>
-    @if(count($rows)) @foreach($rows as $v)
-
-  <tr>
-    <td align="center">
-        <input class="select-row" type="checkbox" name="id[]" value="{{$v['id']}}">
-    </td>
-    <!--
-    <td align="center">
-        {{goodsImage($v)}}
-    </td>
-    -->
-    <td align="left">
-        {{$v['name']}}
-        <div>{{$v['spec']}}</div>
-        <div>{{$v['barcode']}}</div>
-    </td>
-    <td align="left">
-        {{$v['stock_code']}}
-        <div>{{$v['stock_number']}}</div>
-    </td>
-    <td align="left">
-        {{$v['stock_code']}}
-        <div>{{$v['stock_number']}}</div>
-    </td>
-    <td align="center">{{option('goods.unit', $v['unit'])}}</td>
-    <td align="right">{{$v['price1']}}</td>
-    <td align="right">{{$v['price4']}}</td>
-    <td align="right">{{$v['price2']}}</td>
-    <td align="right">{{$v['price3']}}</td>
-    <td align="right">{{$v['level_amount']}}</td>
-    <td align="right">{{$v['weight']}}</td>
-    <td align="center">
-        <input type="text" class="form-control input-sort" name="id[{{$v['id']}}]" value="{{$v['sort']}}" />
-    </td>
-    <td align="center">{{$v['id']}}</td>
-    <td align="center">
-      <a class="option" href="{{url('add')}}?id={{$v['id']}}"> 编辑 </a>
-    </td>
-  </tr>
-   @endforeach @endif
-</table>
+    
+    <div class="hidden-xs b-t">
+        <form id="search-form-simple" class="search-form form-inline" action="{{url()}}" method="get">
+            @include('searchForm3')
+        </form>
+    </div>
+    
+    <div class="list-jqgrid">
+        <table id="jqgrid"></table>
+        <div id="jqgrid-page"></div>
+    </div>
+        
 </div>
 
-</form>
+<script>
+var routes = {
+    index: 'stock/product/index',
+    create: 'stock/product/create',
+    delete: 'stock/product/delete',
+    edit: 'stock/product/edit',
+    show: 'stock/product/show',
+    export: 'stock/product/export',
+};
+var $table = null;
+var params = paramsSimple = {{json_encode($search['query'])}};
+var search = null;
+var searchSimple = null;
 
-    <footer class="panel-footer">
-      <div class="row">
-        <div class="col-sm-1 hidden-xs">
-            <button type="button" onclick="optionSort('#myform','{{URL::full()}}');" class="btn btn-default btn-sm"><i class="icon icon-sort-by-order"></i> 排序</button>
-        </div>
-        <div class="col-sm-11 text-right text-center-xs">
-            {{$rows->render()}}
-        </div>
-      </div>
-    </footer>
-</div>
+(function($) {
+    
+    var data = {{json_encode($search['forms'])}};
+
+    search = $('#search-form-advanced').searchForm({
+        data: data,
+        init: function(e) {
+            var self = this;
+        }
+    });
+
+    searchSimple = $('#search-form-simple').searchForm({
+        data: data,
+        init: function(e) {
+            var self = this;
+        }
+    });
+    searchSimple.find('#search-submit').on('click', function() {
+        var query = searchSimple.serializeArray();
+        $.map(query, function(row) {
+            paramsSimple[row.name] = row.value;
+        });
+        $table.jqGrid('setGridParam', {
+            postData: paramsSimple,
+            page: 1
+        }).trigger('reloadGrid');
+
+        return false;
+    });
+
+    $table = $("#jqgrid");
+
+    var model = {{json_encode($columns)}};
+
+    $table.jqGrid({
+        caption: '',
+        datatype: 'json',
+        mtype: 'GET',
+        url: app.url(routes.index),
+        colModel: model,
+        rowNum: 25,
+        autowidth: true,
+        multiselect: true,
+        viewrecords: true,
+        rownumbers: false,
+        width: '100%',
+        height: getPanelHeight(),
+        footerrow: false,
+        postData: params,
+        pager: '#jqgrid-page',
+        ondblClickRow: function(rowid) {
+            var row = $(this).getRowData(rowid);
+            actionLink('edit', row.id);
+        },
+        gridComplete: function() {
+            $(this).jqGrid('setColsWidth');
+        }
+    });
+
+})(jQuery);
+
+function actionLink(action, id) {
+
+    if(action == 'export') {
+        $table.jqGrid('exportGrid');
+        return;
+    }
+
+    if(action == 'show') {
+        viewBox('show','查看', app.url(routes.show, {id: id}));
+        return;
+    }
+
+    if(action == 'create') {
+        formBox('新建', app.url(routes.create), 'stock-warehouse-form', function(res) {
+            if(res.status) {
+                $.toastr('success', res.data, '提醒');
+                $table.jqGrid('setGridParam', {
+                    postData: params,
+                    page: 1
+                }).trigger('reloadGrid');
+                $(this).dialog("close");
+            } else {
+                $.toastr('error', res.data, '提醒');
+            }
+        });
+        return;
+    }
+
+    if(action == 'edit') {
+        if(id == undefined) {
+            var selections = $table.jqGrid('getSelections');
+            if(selections.length) {
+                id = selections[0].id;
+            } else {
+                $.toastr('error', '必须选择一行记录。', '错误');
+                return;
+            }
+        }
+        formBox('编辑', app.url(routes.edit, {id: id}), 'stock-warehouse-form', function(res) {
+            if(res.status) {
+                $.toastr('success', res.data, '提醒');
+                $table.jqGrid('setGridParam', {
+                    postData: params,
+                    page: 1
+                }).trigger('reloadGrid');
+                $(this).dialog("close");
+            } else {
+                $.toastr('error', res.data, '提醒');
+            }
+        });
+        return;
+    }
+
+    if(action == 'delete') {
+        var selections = $table.jqGrid('getSelections');
+        var query = [];
+        $.each(selections, function(i, selection) {
+            query.push(selection.id);
+        });
+        if(query.length) {
+            $.messager.confirm('操作确认', '确定要删除吗？', function() {
+                $.post(app.url(routes.delete), {id: query}, function(res) {
+                    if(res.status) {
+                        $.toastr('success', res.data, '提醒');
+                        $table.jqGrid('setGridParam', {
+                            postData: params,
+                            page: 1
+                        }).trigger('reloadGrid');
+                    } else {
+                        $.toastr('error', res.data, '提醒');
+                    }
+                });
+            });
+
+        } else {
+            $.toastr('error', '最少选择一行记录。', '错误');
+        }
+        return;
+    }
+
+    if(action == 'filter') {
+        // 过滤数据
+        $(search).dialog({
+            title: '数据过滤',
+            modalClass: 'no-padder',
+            buttons: [{
+                text: "确定",
+                'class': "btn-info",
+                click: function() {
+                    var query = search.serializeArray();
+                    $.map(query, function(row) {
+                        params[row.name] = row.value;
+                    });
+                    $table.jqGrid('setGridParam', {
+                        postData: params,
+                        page: 1
+                    }).trigger('reloadGrid');
+                    return false;
+                }
+            },{
+                text: "取消",
+                'class': "btn-default",
+                click: function() {
+                    $(this).dialog("close");
+                }
+            }]
+        });
+        return;
+    }
+}
+
+function getPanelHeight() {
+    var list = $('.list-jqgrid').position();
+    return top.iframeHeight - list.top - 92;
+}
+
+$(window).on('resize', function() {
+	$table.jqGrid('setGridHeight', getPanelHeight());
+});
+</script>

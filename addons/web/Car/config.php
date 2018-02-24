@@ -1,6 +1,6 @@
 <?php 
 return [
-    "name" => "管理-车辆管理",
+    "name" => "车辆",
     "order" => 11,
     "version" => "1.0",
     "description" => "车辆管理",
@@ -17,7 +17,7 @@ return [
     ],
     "controllers" => [
         "car" => [
-            "name" => "车辆管理",
+            "name" => "车辆",
             "actions" => [
                 "index" => [
                     "name" => "列表",
@@ -28,14 +28,17 @@ return [
                 ],
                 "create" => [
                     "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
                 ],
                 "delete" => [
                     "name" => "删除"
                 ]
             ]
         ],
-        "trip" => [
-            "name" => "行程记录",
+        "brand" => [
+            "name" => "车牌",
             "actions" => [
                 "index" => [
                     "name" => "列表",
@@ -46,14 +49,17 @@ return [
                 ],
                 "create" => [
                     "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
                 ],
                 "delete" => [
                     "name" => "删除"
                 ]
             ]
         ],
-        "refuel" => [
-            "name" => "加油记录",
+        "type" => [
+            "name" => "车型",
             "actions" => [
                 "index" => [
                     "name" => "列表",
@@ -64,6 +70,30 @@ return [
                 ],
                 "create" => [
                     "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "plate" => [
+            "name" => "车牌",
+            "actions" => [
+                "index" => [
+                    "name" => "列表",
+                    "access" => 1
+                ],
+                "show" => [
+                    "name" => "显示"
+                ],
+                "create" => [
+                    "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
                 ],
                 "delete" => [
                     "name" => "删除"

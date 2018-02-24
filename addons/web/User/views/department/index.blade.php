@@ -1,4 +1,6 @@
-<div class="panel">
+<div class="panel no-border">
+
+    @include('menu')
 
     <div class="wrapper">
 
@@ -44,10 +46,10 @@
             @else
                 <i class="fa fa-folder-o"></i>
             @endif
-            {{$row['title']}}
+            {{$row['name']}}
 
             </td>
-            <td align="left">{{$row['description']}}</td>
+            <td align="left">{{$row['remark']}}</td>
             <td align="center">
                 <input type="text" name="sort[{{$row['id']}}]" class="form-control input-sort" value="{{$row['sort']}}">
             </td>

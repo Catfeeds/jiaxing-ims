@@ -53,7 +53,7 @@
                 }
 
             } else {
-                handle[type].call(self, i);
+                handle[type].call(self, i, data['type'][i]);
             }
         }
 
@@ -270,14 +270,25 @@
             second2: function(i) {
                 self._second2(i);
             },
-            select: function(i) {
-                var field = $('#search-field-' + i);
-                var data = field.data();
-                var res = [];
-                $.each(data.value, function(k, v) {
-                    res.push({id: k, name: v});
-                });
-                self._select(res, i);
+            select: function(i, type) {
+                var list = type.data || [];
+                if(list.length) {
+                    var res = [];
+                    $.each(list, function(k, v) {
+                        res.push({id: v.id, name: v.text});
+                    });
+                    self._select(res, i);
+                } else {
+                    if(type.url) {
+                        $.post(app.url(type.url), function(res) {
+                            var option = '';
+                            $.map(res.data, function(row) {
+                                option += '<option value="'+row.id+'">'+row.text+'</option>';
+                            });
+                            self._select(option, i);
+                        });
+                    }
+                }
             },
             role: function(i) {
                 $.post(app.url('user/role/dialog'), function(res) {

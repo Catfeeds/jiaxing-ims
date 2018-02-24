@@ -17,7 +17,8 @@ class MailController extends DefaultController
         $search = search_form([
             'referer' => 1
         ]);
-        $rows = DB::table('mail')->paginate($search['limit']);
+        $rows = DB::table('user_mail')->paginate($search['limit']);
+
         return $this->display([
             'rows' => $rows
         ]);
@@ -33,7 +34,7 @@ class MailController extends DefaultController
     public function editAction()
     {
         $id  = (int)Input::get('id');
-        $row = DB::table('mail')->where('id', $id)->first();
+        $row = DB::table('user_mail')->where('id', $id)->first();
         return $this->display([
             'row' => $row,
         ]);
@@ -58,9 +59,9 @@ class MailController extends DefaultController
                 return $this->back()->withErrors($v)->withInput();
             }
             if ($gets['id']) {
-                DB::table('mail')->where('id', $gets['id'])->update($gets);
+                DB::table('user_mail')->where('id', $gets['id'])->update($gets);
             } else {
-                DB::table('mail')->insert($gets);
+                DB::table('user_mail')->insert($gets);
             }
             return $this->success('index', '恭喜你，操作成功。');
         }
@@ -73,7 +74,7 @@ class MailController extends DefaultController
     {
         if (Request::method() == 'POST') {
             $id = Input::get('id');
-            DB::table('mail')->whereIn('id', $id)->delete();
+            DB::table('user_mail')->whereIn('id', $id)->delete();
             return $this->back('操作完成。');
         }
     }

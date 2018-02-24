@@ -180,14 +180,14 @@ class UserController extends DefaultController
             'offset'   => 0,
             'sort'     => '',
             'order'    => '',
-            'limit'    => 25
+            'limit'    => 15
         ], [
             ['text','user.name','姓名'],
             ['text','user.login','账号'],
             ['text','user.id','编号'],
             ['role','user.role_id','角色'],
             ['department','user.department_id','部门'],
-            ['region','user.province_id','地址'],
+            ['region','user.address','地址'],
         ]);
 
         $query = $search['query'];
@@ -208,7 +208,7 @@ class UserController extends DefaultController
                     $model->search($where);
                 }
             }
-            $model->selectRaw('id,concat("u",id) as sid,role_id,status,login,name as text,email,mobile');
+            $model->selectRaw('id,concat("u",id) as sid,role_id,status,login,name,name as text,email,mobile');
             $rows = $model->paginate($query['limit']);
             return response()->json($rows);
         }

@@ -1,86 +1,49 @@
-<!--
-<div id="product-toolbar">
-    <form id="search-form" name="mysearch" class="form-inline" method="get">
-        @include('searchForm')
-    </form>
-</div>
+<div class="wrapper" style="padding-bottom:0;">
 
-<div class="padder">
-    <table id="dialog-product">
-        <thead>
-        <tr>
-            <th data-field="state" data-checkbox="true"></th>
-            <th data-field="name" data-sortable="true" data-align="left">名称</th>
-            <th data-field="spec" data-width="200" data-sortable="true" data-align="left">规格</th>
-            <th data-field="id" data-width="60" data-sortable="true" data-align="center">编号</th>
-        </tr>
-        </thead>
-    </table>
+    <div id="dialog-product-toolbar">
+        <form id="search-form" name="mysearch" class="form-inline" method="get">
+            @include('searchForm')
+        </form>
+    </div>
+
+    <div class="m-t">
+        <table id="dialog-product-{{$gets['jqgrid']}}"></table>
+        <div id="dialog-product-page"></div>
+    </div>
 </div>
 
 <script>
 (function($) {
-    
-    var $table = $('#dialog-product');
+    var params = {{json_encode($gets)}};
+    var $table = $("#dialog-product-{{$gets['jqgrid']}}");
+    var jqgrid = "{{$gets['jqgrid']}}";
 
-    $.optionItem = {
-        row: {},
-        mapping: {}
-    };
+    var model = [
+        {name: "text", index: 'product.name', label: '名称', width: 260, align: 'left'},
+        {name: "category_name", index: 'product_category.name', label: '类别', width: 120, align: 'center'},
+        {name: "stock_number", index: 'product.stock_number', label: '存货编码', width: 80, align: 'center'},
+        {name: "status", formatter:statusFmatter, index: 'product.status', label: '状态', width: 60, align: 'center'},
+        {name: "id", index: 'product.id', label: 'ID', width: 60, align: 'center'}
+    ];
 
-    // 映射字段处理
-    var mappingField = function(row) {
-        var item = {};
-        $.each($.optionItem.mapping, function(k, v) {
-            item[k] = row[v];
-        });
-        $.optionItem.row = item;
-        return item;
+    function statusFmatter(cellvalue, options, rowObject) {
+        return cellvalue == '1' ? '<span>启用</span>' : '<span class="red">停用</span>';
     }
-    // 清除映射的字段
-    var mappingFieldClear = function(row) {
-        var item = {};
-        $.each($.optionItem.mapping, function(k, v) {
-            item[k] = '';
-        });
-        $.optionItem.row = item;
-        return item;
-    }
-    
-    $table.bootstrapTable({
-        iconSize:'sm',
-        sidePagination: 'server',
-        toolbar: "#product-toolbar",
-        showColumns: true,
-        singleSelect: false,
-        method: 'post',
-        clickToSelect: true,
-        height: 380,
-        pagination: true,
-        url: '{{url("product/product/dialog")}}',
-        onLoadSuccess: function(data) {
-            for (var i = 0; i < data.rows.length; i++) {
-                if(data.rows[i].id == $.optionItem.row['product_id']) {
-                    $table.bootstrapTable('check', i);
-                }
-            }
-        },
-        onCheckAll: function(rows) {
-            var items = [];
-            $.map(rows, function(row) {
-                var item = mappingField(row);
-                items.push(item);
-            });
-            $.optionItem.onSelecteds.call($table, items, rows);
-        },
-        onCheck: function(row) {
-            var item = mappingField(row);
-            $.optionItem.onSelected.call($table, item, row);
-        },
-        onUncheck: function(row) {
-            var item = mappingFieldClear(row);
-            $.optionItem.onSelected.call($table, item, row);
-        }
+
+    $table.jqGrid({
+        caption: '',
+        datatype: 'json',
+        mtype: 'POST',
+        url: app.url('product/product/dialog_jqgrid'),
+        colModel: model,
+        rowNum: 500,
+        multiselect: true,
+        viewrecords: true,
+        rownumbers: false,
+        height: 340,
+        footerrow: false,
+        postData: params,
+        pager: '#dialog-product-page'
     });
 
     var data = {{json_encode($search['forms'])}};
@@ -88,6 +51,10 @@
         data: data,
         init:function(e) {
             var self = this;
+            e.status = function(i) {
+                var option = '<option value="1">启用</option><option value="0">停用</option>';
+                self._select(option, i);
+            }
             e.category = function(i) {
                 $.get(app.url('product/category/dialog', {data_type:'json'}),function(res) {
                     var option = '';
@@ -97,137 +64,16 @@
                     self._select(option, i);
                 });
             }
-        }
-    });
-
-    search.find('#search-submit').on('click', function() {
-        var params = search.serializeArray();
-        $.map(params, function(row) {
-            data[row.name] = row.value;
-        });
-        $table.bootstrapTable('refresh', {
-            url:app.url('product/product/dialog', data),
-        });
-        return false;
-    });
-})(jQuery);
-
-</script>
--->
-
-<div class="wrapper" style="padding-bottom:0;">
-
-    <div id="dialog-product-toolbar">
-        <form id="dialog-product-search-form" name="dialog_product_search_form" class="form-inline" method="get">
-            @include('searchForm')
-        </form>
-    </div>
-
-    <div class="m-t">
-        <table id="dialog-product" class="table-condensed"></table>
-        <div id="dialog-product-page"></div>
-    </div>
-
-</div>
-
-<script>
-(function($) {
-    window.productDialog = {};
-    var params = {{json_encode($gets)}};
-    var $table = $("#dialog-product");
-
-    var model = [
-        {name: "name", index:'name', label: '名称', width: 220, align: 'left'},
-        {name: "spec", index:'spec', label: '规格', minWidth: 180, align: 'center'},
-        {name: "id", index:'id', label: 'ID', width: 60, align: 'center'}
-    ];
-
-    $table.jqGrid({
-        caption: '',
-        datatype: 'json',
-        mtype: 'POST',
-        url: app.url('product/product/dialog'),
-        colModel: model,
-        rowNum: 25,
-        multiboxonly: params.multi == 0 ? true : false,
-        multiselect: true,
-        viewrecords: true,
-        rownumbers: false,
-        height: 340,
-        footerrow: false,
-        postData: params,
-        pager: '#dialog-product-page',
-        gridComplete: function() {
-            // 单选时禁用全选按钮
-            if(params.multi == 0) {
-                $("#cb_" + this.p.id).prop('disabled', true);
-            }
-            $(this).jqGrid('setColsWidth');
-        },
-        loadComplete: function(res) {
-            
-            var me = $(this);
-            me.jqGrid('initPagination', res);
-
-            if($.isFunction(window.productDialog.setSelecteds)) {
-                window.productDialog.setSelecteds.call($table);
-            } else {
-                // 设置默认选中
-                window.productDialog.setDefaultSelecteds();
-            }
-
-        },
-        // 双击选中
-        ondblClickRow: function(id) {
-            if(params.multi == 1) {
-                $table.jqGrid('setSelection', id);
-            }
-            if($.isFunction(window.productDialog.getSelecteds)) {
-                window.productDialog.getSelecteds.call($table);
-            } else {
-                window.productDialog.getDefaultSelecteds();
-            }
-        },
-    });
-
-    window.productDialog.setDefaultSelecteds = function(res) {
-        var ids = $('#'+params.id).val();
-        ids = ids.split(',');
-        $.each(ids, function(k, v) {
-            if(v) {
-                $table.jqGrid('setSelection', v);
-            }
-        });
-    }
-
-    window.productDialog.getDefaultSelecteds = function() {
-        var rows = $table.jqGrid('getSelections');
-        if(params.multi == 0) {
-            if(rows.length > 1) {
-                $.toastr('error', '只能选择一项。', '错误');
-                return false;
+            e.supplier = function(i) {
+                $.post(app.url('supplier/supplier/dialog', {limit:10000}), function(res) {
+                    var option = '';
+                    $.map(res.data, function(row) {
+                        option += '<option value="'+row.id+'">'+ row.nickname +'</option>';
+                    });
+                    self._select(option, i);
+                });
             }
         }
-
-        var id = [], text = [];
-        for (var i = 0; i < rows.length; i++) {
-            id.push(rows[i].id);
-            text.push(rows[i].text);
-        }
-
-        // 会写数据
-        $('#'+params.id).val(id.join(','));
-        $('#'+params.id+'_text').text(text.join(','));
-
-        // 关闭窗口
-        $('#modal-dialog-user').dialog("close");
-        return true;
-    }
-
-    var data = {{json_encode($search['forms'])}};
-    var search = $('#dialog-product-search-form').searchForm({
-        data: data,
-        init:function(e) {}
     });
 
     search.find('#search-submit').on('click', function() {

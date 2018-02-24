@@ -9,7 +9,7 @@
           <select class="form-control input-inline input-sm" name="parent_id" id="parent_id">
               <option value="0"> - </option>
                @foreach(get_department() as $v)
-                  <option value="{{$v['id']}}" @if($res->parent_id==$v['id']) selected @endif >{{$v['layer_space']}}{{$v['title']}}</option>
+                  <option value="{{$v['id']}}" @if($res->parent_id==$v['id']) selected @endif >{{$v['layer_space']}}{{$v['name']}}</option>
                @endforeach
           </select>
         </td>
@@ -17,7 +17,7 @@
 
     <tr>
         <td align="right">部门名称 <span style="color:red;">*</span></td>
-        <td><input type="text" id="title" name="title" value="{{$res['title']}}" class="form-control input-inline input-sm" /></td>
+        <td><input type="text" id="name" name="name" value="{{$res['name']}}" class="form-control input-inline input-sm" /></td>
     </tr>
 
     <tr>

@@ -15,11 +15,12 @@ use Aike\Web\Index\Controllers\DefaultController;
 
 class ProductController extends DefaultController
 {
-    public $permission = ['dialog', 'dialog_jqgrid'];
+    public $permission = ['dialog'];
 
     // 产品列表
     public function indexAction()
     {
+        /*
         // 更新排序
         if (Request::method() == 'POST') {
             $gets = Input::get('id');
@@ -32,12 +33,11 @@ class ProductController extends DefaultController
             'status'  => 1,
             'referer' => 1,
         ], [
-            ['text','product.name','产品名称'],
-            ['text','product.stock_code','存货代码'],
-            ['text','product.stock_number','存货编号'],
-            ['category','product.category_id','产品类别'],
-            ['warehouse','product.warehouse_id','产品仓库'],
-            ['text','product.id','产品ID'],
+            ['text','product.name','商品名称'],
+            ['text','product.stock_code','存货编码'],
+            ['category','product.category_id','商品类别'],
+            ['warehouse','product.warehouse_id','默认仓库'],
+            ['text','product.id','商品ID'],
         ]);
 
         $query  = $search['query'];
@@ -80,10 +80,192 @@ class ProductController extends DefaultController
             'query'     => $query,
             'search'    => $search,
         ));
+        */
+
+        $columns = [[
+            'name'     => 'name',
+            'index'    => 'product.name',
+            'search'   => 'text',
+            'label'    => '商品名称',
+            'minWidth' => 200,
+            'align'    => 'left',
+        ],[
+            'name'     => 'spec',
+            'index'    => 'product.spec',
+            'search'   => 'text',
+            'label'    => '商品规格',
+            'width' => 200,
+            'align'    => 'left',
+        ],[
+            'name'     => 'category_name',
+            'index'    => 'product.category_id',
+            'search'   => [
+                'type' => 'select',
+                'url'  => 'stock/product-category/dialog',
+            ],
+            'label'    => '商品类别',
+            'width' => 180,
+            'align'    => 'center',
+        ],[
+            'name'     => 'price',
+            'index'    => 'product.price',
+            'search'   => 'text',
+            'label'    => '销售价',
+            'width' => 80,
+            'align'    => 'right',
+        ],[
+            'name'     => 'barcode',
+            'index'    => 'product.barcode',
+            'search'   => 'text',
+            'label'    => '条码',
+            'width' => 160,
+            'align'    => 'center',
+        ],[
+            'name'     => 'store_name',
+            'index'    => 'store.name',
+            'search'   => [
+                'type' => 'select',
+                'data' => [['id' => 1, 'text' => '22'],['id' => 0, 'text' => '11']],
+            ],
+            'label'    => '所属门店',
+            'width' => 160,
+            'align'    => 'center',
+        ],[
+            'name'     => 'is_share',
+            'index'    => 'product.is_share',
+            'formatter' => 'is_share',
+            'search'   => [
+                'type' => 'select',
+                'data' => [['id' => 1, 'text' => '是'],['id' => 0, 'text' => '否']],
+            ],
+            'label'    => '是否共享',
+            'width' => 160,
+            'align'    => 'center',
+        ],[
+            'name'     => 'status',
+            'index'    => 'product.status',
+            'label'    => '状态',
+            'width'    => 100,
+            'search'   => [
+                'type' => 'select',
+                'data' => [['id' => 1, 'text' => '启用'],['id' => 0, 'text' => '停用']],
+            ],
+            'formatter' => 'status',
+            'align'     => 'center',
+        ],[
+            'name'    => 'updated_at',
+            'index'   => 'product.updated_at',
+            'label'   => '操作时间',
+            'width'   => 140,
+            'formatter' => 'date',
+            'formatoptions' => [
+                'srcformat' => 'u',
+                'newformat' => 'Y-m-d H:i'
+            ],
+            'align' => 'center',
+        ],[
+            'name'  => 'id',
+            'index' => 'product.id',
+            'label' => 'ID',
+            'width' => 60,
+            'align' => 'center',
+        ]];
+
+        $search_columns = search_columns($columns);
+        $search = search_form([
+            'referer'  => 1,
+            'advanced' => 1,
+        ], $search_columns);
+
+        $query = $search['query'];
+
+        /*
+        $rows = readExcel(base_path('/src/3.xls'));
+        foreach ($rows as $row) {
+            DB::table('product_category')->insert([
+                'name' => $row[0],
+                'type' => 2,
+            ]);
+        }
+        exit;
+        */
+
+        //print_r($rows);
+        //exit;
+        /*
+        $rows = DB::table('product_category')->get();
+        foreach ($rows as $row) {
+            if ($row['remark'] != '顶级分类') {
+                $cat = DB::table('product_category')->where('name', $row['remark'])->first();
+                DB::table('product_category')->where('id', $row['id'])->update(['parent_id' => $cat['id']]);
+            }
+        }
+        */
+
+        /*
+        // 导入商品
+        $categorys = DB::table('product_category')->where('type', 2)->get()->keyBy('name');
+        
+        $rows = readExcel(base_path('/src/4.xls'));
+
+        foreach ($rows as $row) {
+
+            if ($row[0]) {
+                DB::table('product')->insert([
+                    'name' => $row[0],
+                    'spec' => $row[1],
+                    'unit' => $row[2],
+                    'category_id' => (int)$categorys[$row[4]]['id'],
+                    'price' => $row[3],
+                    'type' => 2,
+                ]);
+            }
+        }
+
+        exit;
+        */
+        
+        //print_r($rows);
+        //exit;
+        /*
+        $rows = DB::table('product_category')->get();
+        foreach ($rows as $row) {
+            if ($row['remark'] != '顶级分类') {
+                $cat = DB::table('product_category')->where('name', $row['remark'])->first();
+                DB::table('product_category')->where('id', $row['id'])->update(['parent_id' => $cat['id']]);
+            }
+        }
+        */
+
+
+        $model = Product::where('product.type', 1)
+        ->LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
+        ->orderBy('product.id', 'asc')
+        ->select(['product.*', 'product_category.name as category_name']);
+
+        foreach ($search['where'] as $where) {
+            if ($where['active']) {
+                if ($where['field'] == 'product.category_id') {
+                    $category = ProductCategory::where('id', $where['search'])->first();
+                    $model->whereBetween('product_category.lft', [$category->lft, $category->rgt]);
+                } else {
+                    $model->search($where);
+                }
+            }
+        }
+
+        if (Input::ajax()) {
+            return response()->json($model->paginate($search['limit']));
+        }
+
+        return $this->display([
+            'search'  => $search,
+            'columns' => $columns,
+        ]);
     }
 
     // 添加产品
-    public function addAction()
+    public function createAction()
     {
         if (Request::method() == 'POST') {
             $gets = Input::get();
@@ -93,105 +275,81 @@ class ProductController extends DefaultController
             $rules = [
                 'name'         => 'required',
                 'category_id'  => 'required',
-                'stock_code'   => 'required|unique:product,stock_code,'.$gets['id'].',id,stock_type,1',
-                'level_amount' => 'required',
             ];
             $v = Validator::make($gets, $rules);
             if ($v->fails()) {
-                return $this->back()->withErrors($v)->withInput();
+                return $this->json($v->errors()->all());
             }
             
+            /*
             // 上传图片
             $image = image_create('products', 'image', $model['image']);
             if ($image) {
                 $gets['image'] = $image;
             }
+            */
 
-            // 成品标记
-            $gets['stock_type'] = 1;
-
+            $gets['type'] = 1;
             $model->fill($gets)->save();
-            
-            return $this->success('index', '恭喜你，产品更新成功。');
+            return $this->json('恭喜你，产品更新成功。', true);
         }
 
         $id = (int)Input::get('id');
-        $res = DB::table('product')->where('id', $id)->first();
+        $row = DB::table('product')->where('id', $id)->first();
 
-        $category = ProductCategory::type('sale')->orderBy('lft', 'asc')->get()->toNested();
-        $warehouse = Warehouse::type('sale')->orderBy('lft', 'asc')->get()->toNested();
+        $categorys = ProductCategory::where('type', 1)->orderBy('lft', 'asc')->get()->toNested();
+        $warehouses = Warehouse::orderBy('lft', 'asc')->get();
         
-        return $this->display(array(
-            'warehouse' => $warehouse,
-            'category'  => $category,
-            'res'       => $res,
-        ));
+        return $this->render([
+            'warehouse'  => $warehouse,
+            'categorys'  => $categorys,
+            'warehouses' => $warehouses,
+            'row'        => $row,
+        ], 'create');
     }
 
-    // 成品出入库单
-    public function bomAction()
+    // 编辑商品
+    public function editAction()
     {
         if (Request::method() == 'POST') {
             $gets = Input::get();
-
-            // 检查产品是否没有选择
-            $products = is_array($gets['products']) ? $gets['products'] : json_decode($gets['products'], true);
-
-            if (empty($products)) {
-                return $this->json('商品列表不能为空。');
-            }
-
-            if ($gets['sn']) {
-                // 写入库或出入主表
-                $budget['sn'] = $gets['sn'];
-            } else {
-                // 统计数量
-                $budget_count = DB::table('supplier_budget')->count('id');
-                // 写入库或出入主表
-                $budget['sn'] = date('ym-').($budget_count + 1);
-            }
-
-            // 入库日期
-            $budget['date'] = $gets['date'] == '' ? date('Y-m-d') : $gets['date'];
             
-            $insert_id = DB::table('supplier_budget')->insertGetId($budget);
-    
-            foreach ($products as $row) {
-                $data = [
-                    'budget_id'   => $insert_id,
-                    'product_id'  => $row['product_id'],
-                    'quantity'    => $row['quantity'],
-                    'description' => (string)$row['description'],
-                ];
-                // 写入库数据表
-                DB::table('supplier_budget_data')->insert($data);
+            $model = Product::findOrNew($gets['id']);
+            
+            $rules = [
+                'name'         => 'required',
+                'category_id'  => 'required',
+            ];
+            $v = Validator::make($gets, $rules);
+            if ($v->fails()) {
+                return $this->json($v->errors()->all());
             }
+            
+            /*
+            // 上传图片
+            $image = image_create('products', 'image', $model['image']);
+            if ($image) {
+                $gets['image'] = $image;
+            }
+            */
 
-            notify()->sms(['18990305012'], '采购周期预算 - 有新的单据：'.$budget['sn'].'，日期：'.$budget['date'].'，请查看。');
-
-            return $this->json('数据提交成功。', true);
+            $gets['type'] = 1;
+            $model->fill($gets)->save();
+            return $this->json('恭喜你，产品更新成功。', true);
         }
 
-        // 统计数量
-        $budget_count = DB::table('supplier_budget')->count('id');
+        $id = (int)Input::get('id');
+        $row = DB::table('product')->where('id', $id)->first();
 
-        // 预算编号
-        $budget['sn'] = date('ym-').($budget_count + 1);
-
-        $models = [
-            ['name' => "id", 'hidden' => true],
-            ['name' => 'os', 'label' => '&nbsp;', 'formatter' => 'options', 'width' => 60, 'sortable' => false, 'align' => 'center'],
-            ['name' => "goods_id", 'hidden' => true, 'label' => '商品ID'],
-            ['name' => "goods_name", 'width' => 280, 'label' => '商品', 'rules' => ['required'=>true], 'sortable' => false, 'editable' => true],
-            ['name' => "quantity", 'label' => '数量', 'width' => 140, 'rules' => ['required' => true, 'minValue' => 1,'integer' => true], 'formatter' => 'integer', 'sortable' => false, 'editable' => true, 'align' => 'right'],
-            ['name' => "remark", 'label' => '备注', 'width' => 200, 'sortable' => false, 'editable' => true]
-        ];
-
-        return $this->display([
-            'budget'   => $budget,
-            'validate' => $this->validate,
-            'models'   => $models,
-        ]);
+        $categorys = ProductCategory::where('type', 1)->orderBy('lft', 'asc')->get()->toNested();
+        $warehouses = Warehouse::orderBy('lft', 'asc')->get();
+        
+        return $this->render([
+            'warehouse'  => $warehouse,
+            'categorys'  => $categorys,
+            'warehouses' => $warehouses,
+            'row'        => $row,
+        ], 'create');
     }
 
     // 导出产品信息
@@ -257,9 +415,9 @@ class ProductController extends DefaultController
     }
 
     /**
-     * 弹出产品列表
+     * 弹出商品
      */
-    public function dialog_jqgridAction()
+    public function dialogAction()
     {
         $gets = Input::get();
 
@@ -293,23 +451,10 @@ class ProductController extends DefaultController
         if (Request::method() == 'POST') {
             $model = DB::table('product')
             ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
-            ->where('product_category.type', $query['type'])
+            ->leftJoin('warehouse', 'warehouse.id', '=', 'product.warehouse_id')
+            ->where('product.type', 1)
             ->where('product.status', 1)
             ->orderBy('product_category.lft', 'asc');
-
-            if ($this->access['dialog'] == 1) {
-                // 仓库负责人
-                if ($query['owner_id']) {
-                    $warehouse_id = DB::table('warehouse')->where('user_id', $query['owner_id'])->pluck('id');
-                    $model->whereIn('product.warehouse_id', $warehouse_id);
-                }
-            }
-
-            // 指定了供应商
-            if ($query['supplier_id'] > 0) {
-                $model->leftJoin('product_supplier', 'product_supplier.product_id', '=', 'product.id')
-                ->where('product_supplier.supplier_id', $query['supplier_id']);
-            }
 
             // 排序方式
             if ($query['sort'] && $query['order']) {
@@ -325,193 +470,30 @@ class ProductController extends DefaultController
                 }
             }
 
-            $rows = $model->selectRaw("product.*,product_category.name as category_name, IF(product.spec='', product.name, concat(product.name,' - ', product.spec)) as text")
-            ->paginate($query['limit']);
+            $rows = $model->selectRaw("
+            product.*,
+            product_category.name as category_name, 
+            product.name, 
+            product.name as text, 
+            product.spec,
+            product.unit,
+            warehouse.name as warehouse_name,
+            warehouse.id as warehouse_id
+            ")->paginate($query['limit']);
 
-            if ($query['stock'] == 'a') {
-                // 获取库存现存量
-                $totals = Stock::total();
+            $lasts = DB::select('select * from stock_purchase_line where id in (select max(id) from stock_purchase_line group by product_id) order by stock_purchase_line.id desc');
+            $lasts = array_by($lasts, 'product_id');
 
-                // 设置现存量
-                $items = $rows->map(function ($row) use ($totals) {
-                    $row['stock_total'] = (int)$totals[$row['id']];
-                    return $row;
-                });
-                $rows->setCollection($items);
-            }
-
-            if ($query['yonyou'] == 'a') {
-                $time = time();
-
-                // 去年 上月本月下月
-                $last_a = date('Ym', strtotime('-1 year -1 month', $time));
-                $last_b = date('Ym', strtotime('-1 year +1 month', $time));
-
-                // 今年上月本月
-                $now_a = date('Ym', strtotime('-1 month', $time));
-                $now_b = date('Ym', $time);
-
-                // 去年同期使用量
-                $yonyou_data_last = DB::table('stock_yonyou_data')
-                ->whereRaw('DATE_FORMAT(date,"%Y%m") between ? and ?', [date('Y', strtotime('-1 year')).'01', date('Ym', strtotime('-1 year'))])
-                ->groupBy('code')
-                ->selectRaw('code,sum(quantity_get) as quantity')
-                ->pluck('quantity', 'code');
-
-                $yonyou_data1 = DB::table('stock_yonyou_data')
-                ->whereRaw('DATE_FORMAT(date,"%Y%m") between ? and ?', [$last_a, $last_b])
-                ->groupBy('ym', 'code')
-                ->selectRaw('DATE_FORMAT(date,"%Y%m") as ym,code,sum(quantity_get) as quantity')
-                ->get();
-
-                // 去年月范围
-                $months1 = [];
-                $_months1 = range($last_a, $last_b);
-                foreach ($_months1 as $k => $v) {
-                    $months1[$v] = 'month_'.($k + 1);
-                }
-
-                // 组合去年用量数据
-                $_yonyou_data1 = [];
-                foreach ($yonyou_data1 as $k => $v) {
-                    $kk = $months1[$v['ym']];
-                    $_yonyou_data1[$v['code']][$kk] = $v['quantity'];
-                }
-
-                $yonyou_data2 = DB::table('stock_yonyou_data')
-                ->whereRaw('DATE_FORMAT(date,"%Y%m") between ? and ?', [$now_a, $now_b])
-                ->groupBy('ym', 'code')
-                ->selectRaw('DATE_FORMAT(date,"%Y%m") as ym,code,sum(quantity_get) as quantity')
-                ->get();
-
-                // 去年月范围是
-                $months2 = [];
-                $_months2 = range($now_a, $now_b);
-                foreach ($_months2 as $k => $v) {
-                    $months2[$v] = 'month_'.($k + 1);
-                }
-
-                // 组合去年用量数据
-                $_yonyou_data2 = [];
-                foreach ($yonyou_data2 as $k => $v) {
-                    $kk = $months2[$v['ym']];
-                    $_yonyou_data2[$v['code']][$kk] = $v['quantity'];
-                }
-
-                // 目前使用量
-                $yonyou_data_now = DB::table('stock_yonyou_data')
-                ->groupBy('code')
-                ->selectRaw('sum(quantity_set - quantity_get) as quantity,code')
-                ->pluck('quantity', 'code');
-
-                // 本年最低价
-                $yonyou_low_price = DB::table('stock_yonyou_data')
-                ->groupBy('code')
-                ->where('price', '>', 0)
-                ->whereRaw('year(date)=year(now())')
-                ->selectRaw('min(price) as min_price,code')
-                ->pluck('min_price', 'code');
-
-                // 周期订单预算
-                $budgets = DB::table('supplier_budget')
-                ->leftJoin('supplier_budget_data', 'supplier_budget.id', '=', 'supplier_budget_data.budget_id')
-                ->selectRaw('supplier_budget_data.product_id,sum(supplier_budget_data.quantity) as budget_quantity')
-                ->groupBy('supplier_budget_data.product_id')
-                ->where('date', date('Y-m-d'))
-                ->pluck('budget_quantity', 'product_id');
-
-                $items = $rows->map(function ($row) use ($_yonyou_data1, $_yonyou_data2, $yonyou_data_now, $budgets, $yonyou_low_price, $yonyou_data_last) {
-                    $code = $row['stock_number'];
-
-                    $row['month_1'] = $_yonyou_data1[$code]['month_1'];
-                    $row['month_2'] = $_yonyou_data1[$code]['month_2'];
-                    $row['month_3'] = $_yonyou_data1[$code]['month_3'];
-
-                    $row['month_4'] = $_yonyou_data2[$code]['month_1'];
-                    $row['month_5'] = $_yonyou_data2[$code]['month_2'];
-
-                    $row['month_6'] = $yonyou_data_now[$code];
-
-                    // 去年同期使用量
-                    $row['last_year'] = $yonyou_data_last[$code];
-
-                    // 本年历史最低价
-                    $row['low_price'] = $yonyou_low_price[$code];
-
-                    $row['budget'] = $budgets[$row['id']];
-
-                    return $row;
-                });
-                $rows->setCollection($items);
-            }
-
+            $rows->transform(function ($row) use ($lasts) {
+                $row['last_price'] = $lasts[$row['id']]['price'];
+                return $row;
+            });
             return response()->json($rows);
         }
         return $this->render(array(
             'search' => $search,
             'gets'   => $gets,
         ), 'jqgrid');
-    }
-
-    /**
-     * 弹出层信息
-     */
-    public function dialogAction()
-    {
-        $gets = Input::get();
-
-        $search = search_form([
-            'advanced' => '',
-            'owner_id' => 0,
-            'type'     => 1,
-            'offset'   => '',
-            'sort'     => '',
-            'order'    => '',
-            'limit'    => '',
-        ], [
-            ['text','product.name','产品名称'],
-            ['text','product.spec','产品规格'],
-            ['text','product.id','产品编号'],
-            ['text','product.barcode','产品条码'],
-            ['category','product.category_id','产品类别'],
-        ]);
-        $query  = $search['query'];
-
-        if (Request::method() == 'POST' || Request::isJson() || $gets['isjson']) {
-            $model = DB::table('product')
-            ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
-            ->where('product_category.type', $query['type'])
-            ->where('product.status', 1);
-
-            // 筛选仓库负责人
-            if ($query['owner_id']) {
-                $warehouse_id = DB::table('warehouse')->where('user_id', $query['owner_id'])->pluck('id');
-                $model->whereIn('product.warehouse_id', $warehouse_id);
-            }
-
-            // 排序方式
-            if ($query['sort'] && $query['order']) {
-                $model->orderBy('product.'.$query['sort'], $query['order']);
-            }
-
-            foreach ($search['where'] as $where) {
-                if ($where['active']) {
-                    $model->search($where);
-                }
-            }
-
-            $json['total'] = $model->count();
-
-            $rows = $model->selectRaw("product.*, product_category.name as category_name,IF(product.spec='', product.name, concat(product.name,' - ', product.spec)) as text")
-            ->paginate($query['limit']);
-
-            return response()->json($rows);
-        }
-
-        return $this->render(array(
-            'search' => $search,
-            'gets'   => $gets,
-        ));
     }
 
     // 删除产品

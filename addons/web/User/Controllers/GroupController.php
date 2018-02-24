@@ -26,7 +26,7 @@ class GroupController extends DefaultController
             'label'   => '排序',
             'width'   => 120,
             'align'   => 'center',
-        ],[
+        ]/*,[
             'name'     => 'status',
             'index'    => 'user_group.status',
             'label'    => '状态',
@@ -37,10 +37,10 @@ class GroupController extends DefaultController
             ],
             'formatter' => 'status',
             'align'     => 'center',
-        ],[
+        ]*/,[
             'name'    => 'updated_at',
             'index'   => 'user_group.updated_at',
-            'search'  => 'second2',
+            //'search'  => 'second2',
             'label'   => '操作时间',
             'width'   => 140,
             'formatter' => 'date',
@@ -77,18 +77,9 @@ class GroupController extends DefaultController
             return response()->json($model->get());
         }
 
-        $tabs = [
-            ['key' => 'user', 'name'=>'用户', 'url' => 'user/user/index'],
-            ['key' => 'role', 'name'=>'角色', 'url' => 'user/role/index'],
-            ['key' => 'group', 'name'=>'用户组', 'url' => 'user/group/index'],
-            ['key' => 'department', 'name'=>'部门', 'url' => 'user/department/index'],
-            ['key' => 'position', 'name'=>'职位', 'url' => 'user/position/index'],
-        ];
-
         return $this->display([
             'search'  => $search,
             'columns' => $columns,
-            'tabs'    => $tabs,
         ]);
     }
 

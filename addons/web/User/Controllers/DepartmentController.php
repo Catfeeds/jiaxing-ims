@@ -29,7 +29,7 @@ class DepartmentController extends DefaultController
                         'xtype' => 'textfield',
                     ],
                 ],[
-                    'dataIndex' => 'description',
+                    'dataIndex' => 'remark',
                     'width'     => 200,
                     'text'      => '描述',
                 ],[
@@ -73,7 +73,7 @@ class DepartmentController extends DefaultController
 
         if (Request::method() == 'POST') {
             $rules = [
-                'title' => 'required'
+                'name' => 'required'
             ];
             $v = Validator::make($gets, $rules);
 
@@ -114,12 +114,14 @@ class DepartmentController extends DefaultController
                 ];
             }
 
+            /*
             $json[] = [
                 'id'    => 0,
                 'sid'   => 'all',
                 'name'  => '全体人员',
                 'text'  => '全体人员',
             ];
+            */
 
             return response()->json($json);
         }

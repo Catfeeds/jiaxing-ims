@@ -238,7 +238,7 @@ $.extend($.fn.fmatter, {
 $.extend($.fn.fmatter, {
     status: function(cellvalue, options, rowdata) {
         var editoptions = options.colModel.editoptions;
-        return cellvalue == 1 ? '<span data-id="' + cellvalue +'" class="label label-success">已读</span>' : '<span data-id="' + cellvalue +'" class="label label-danger">未读</span>';
+        return cellvalue == 1 ? '<span data-id="' + cellvalue +'" class="text-info">启用</span>' : '<span data-id="' + cellvalue +'" class="text-danger">停用</span>';
     }
 });
 
@@ -533,7 +533,7 @@ $.jgrid.extend({
 
             var me = this;
             if(me.p.datatype == 'json') {
-                me.p.rawData = me.pager === undefined ? res : res.data;
+                me.p.rawData = me.p.pager === undefined ? res : res.data;
             }
             
             $(me.p.pager).bootpag({
@@ -1191,7 +1191,7 @@ $.jgrid.extend({
 				firstLastUse: false,
                 first: '<span aria-hidden="true">&larr;</span>',
                 last: '<span aria-hidden="true">&rarr;</span>',
-                wrapClass: 'pagination',
+                wrapClass: 'pagination pagination-sm',
                 activeClass: 'active',
                 disabledClass: 'disabled',
                 nextClass: 'next',
@@ -1293,7 +1293,7 @@ $.jgrid.extend({
                 p = ['<ul class="', settings.wrapClass, ' bootpag">'];
             
             if(settings.rowList.length) {
-                p = p.concat('<li><select class="form-control input-inline">');
+                p = p.concat('<li><select class="form-control input-sm input-inline">');
                 $.each(settings.rowList, function(i, list) {
                     var selected = settings.rowNum == list ? ' selected="selected"' : '';
                     p = p.concat(['<option value="',list,'" ',selected,'>',list,'</option>']);

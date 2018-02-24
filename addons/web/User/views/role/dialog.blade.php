@@ -53,7 +53,7 @@
         if(params.multi == 0) {
             selected = {};
         }
-        selected[row[sid]] = row.title;
+        selected[row[sid]] = row.name;
         setSelected();
     }
 

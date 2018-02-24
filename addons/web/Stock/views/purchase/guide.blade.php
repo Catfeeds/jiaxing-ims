@@ -182,12 +182,13 @@ var searchSimple = null;
         $.map(query, function(row) {
             paramsSimple[row.name] = row.value;
         });
+        /*
         $table.jqGrid('setGridParam', {
             postData: paramsSimple,
             page: 1
         }).trigger('reloadGrid');
-
-        return false;
+        */
+        //return false;
     });
 
     $('.list-jqgrid').height(getPanelHeight());

@@ -35,46 +35,62 @@ return [
                 "index" => [
                     "name" => "列表"
                 ],
-                "add" => [
+                "create" => [
                     "name" => "新建"
                 ],
-                "export" => [
-                    "name" => "导出"
+                "edit" => [
+                    "name" => "编辑"
                 ],
                 "delete" => [
                     "name" => "删除"
-                ],
-                "dialog" => [
-                    "name"   => "对话框",
-                    "access" => 1
                 ]
             ]
         ],
-        "category" => [
+        "product-category" => [
             "name" => "商品类别",
             "actions" => [
                 "index" => [
                     "name" => "列表"
                 ],
-                "add" => [
+                "create" => [
                     "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
                 ],
                 "delete" => [
                     "name" => "删除"
-                ],
-                "dialog" => [
-                    "name"   => "对话框",
                 ]
             ]
         ],
-        "price" => [
-            "name" => "产品单价",
+        "service" => [
+            "name" => "服务",
             "actions" => [
                 "index" => [
                     "name" => "列表"
                 ],
-                "add" => [
+                "create" => [
                     "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "service-category" => [
+            "name" => "服务类别",
+            "actions" => [
+                "index" => [
+                    "name" => "列表"
+                ],
+                "create" => [
+                    "name" => "新建"
+                ],
+                "edit" => [
+                    "name" => "编辑"
                 ],
                 "delete" => [
                     "name" => "删除"
@@ -151,25 +167,17 @@ return [
                 "index" => [
                     "name" => "列表"
                 ],
+                "line" => [
+                    "name" => "明细"
+                ],
                 "create" => [
                     "name" => "新建"
                 ],
                 "edit" => [
                     "name" => "编辑"
                 ],
-                "delete" => [
-                    "name" => "删除"
-                ]
-            ]
-        ],
-        "type" => [
-            "name" => "库存类型",
-            "actions" => [
-                "index" => [
-                    "name" => "列表"
-                ],
-                "add" => [
-                    "name" => "新建"
+                "trash" => [
+                    "name" => "回收站"
                 ],
                 "delete" => [
                     "name" => "删除"

@@ -1,4 +1,6 @@
-<div class="panel">
+<div class="panel no-border">
+
+    @include('menu')
 
     <div class="wrapper">
 
@@ -24,8 +26,7 @@
                     <input class="select-all" type="checkbox">
                 </th>
                 <th align="left">名称</th>
-                <th align="left">代码</th>
-                <th align="center">用户数</th>
+                <th align="center">人数</th>
                 <th align="center">排序</th>
                 <th align="center">ID</th>
                 <th align="center"></th>
@@ -45,10 +46,9 @@
                 @else
                     <i class="fa fa-folder-o"></i>
                 @endif
-                {{$row['title']}}
+                {{$row['name']}}
 
             </td>
-            <td align="left">{{$row['name']}}</td>
             <td align="center"><span class="badge badge-primary">{{(int)$count[$row['id']]}}</span></td>
             <td align="center">
                 <input type="text" name="sort[{{$row['id']}}]" class="form-control input-sort" value="{{$row['sort']}}">

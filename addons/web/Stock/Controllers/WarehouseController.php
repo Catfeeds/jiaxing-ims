@@ -11,6 +11,8 @@ use Aike\Web\Index\Controllers\DefaultController;
 
 class WarehouseController extends DefaultController
 {
+    public $permission = ['dialog'];
+
     // 仓库列表
     public function indexAction()
     {
@@ -34,14 +36,13 @@ class WarehouseController extends DefaultController
             'width'    => 100,
             'search'   => [
                 'type' => 'select',
-                'data' => ['1' => '启用', '0' => '停用'],
+                'data' => [['id' => 1, 'text' => '启用'],['id' => 0, 'text' => '停用']],
             ],
             'formatter' => 'status',
             'align'     => 'center',
         ],[
             'name'    => 'updated_at',
             'index'   => 'warehouse.updated_at',
-            'search'  => 'second2',
             'label'   => '操作时间',
             'width'   => 140,
             'formatter' => 'date',
@@ -140,6 +141,51 @@ class WarehouseController extends DefaultController
             'type' => $types,
             'row'  => $row,
         ), 'create');
+    }
+
+    // 供应商对话框
+    public function dialogAction()
+    {
+        $search = search_form([
+            'advanced' => '',
+            'sort'     => '',
+            'order'    => '',
+            'offset'   => 0,
+            'limit'    => 10,
+        ], [
+            ['text','user.name','姓名'],
+            ['text','user.login','账号'],
+            ['text','user.id','编号'],
+            ['address','user.address','地址'],
+        ]);
+
+        $query = $search['query'];
+
+        if (Request::method() == 'POST') {
+            $model = Warehouse::select(['name as text', 'id']);
+
+            // 排序方式
+            if ($query['sort'] && $query['order']) {
+                $model->orderBy($query['sort'], $query['order']);
+            }
+
+            // 搜索条件
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
+
+            $rows = $model->paginate();
+
+            return response()->json($rows);
+        }
+        $get = Input::get();
+
+        return $this->render(array(
+            'search' => $search,
+            'get'    => $get,
+        ));
     }
 
     // 删除仓库

@@ -9,17 +9,15 @@
         <div class="wrapper-xs">
             <div class="col-sm-2">
             <div class="form-group">
-                {{$column[2]}}
+                <label class="control-label">{{$column[2]}}</label>
                 <?php
                 if (is_array($column[0])) {
                     $__type  = $column[0]['type'];
-                    $__value = json_encode((array)$column[0]['data']);
                 } else {
                     $__type  = $column[0];
-                    $__value = '';
                 }
                 ?>
-                <input type="hidden" name="field_{{$i}}" id="search-field-{{$i}}" data-value='{{$__value}}' data-type="{{$__type}}" value="{{$column[1]}}">
+                <input type="hidden" name="field_{{$i}}" id="search-field-{{$i}}" data-type="{{$__type}}" value="{{$column[1]}}">
             </div>
             </div>
             <div class="col-sm-2">
