@@ -24,7 +24,7 @@
     @foreach($rows['data'] as $row)
     <tr>
         <td align="left">
-            {{$row['nickname']}}
+            {{$row['name']}}
         </td>
         <td align="center">
         {{$row['role']}}

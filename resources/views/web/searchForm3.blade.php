@@ -17,9 +17,9 @@ $a++;
         @if($a > 1) &nbsp; @endif
         @if($column[0] == 'text2')
             <input type="hidden" name="label_{{$i}}" id="search-label-{{$i}}" value="{{$column[2]}}">
-            关键词: </span>
+            <label class="control-label">关键词: </label>
         @else
-            <span id="search-label-{{$i}}">{{$column[2]}}: </span>
+            <span id="search-label-{{$i}}"><label class="control-label">{{$column[2]}}: </label></span>
         @endif
 
         <?php

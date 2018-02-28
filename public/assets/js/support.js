@@ -367,11 +367,14 @@ function formBox(title, url, id, success, error)
 /**
  * 显示窗口
  */
-function viewBox(name, title, url) {
+function viewBox(name, title, url, size) {
 
-    $('#view-box').__dialog({
+    size = size || 'md';
+
+    return $('#view-box').__dialog({
         title: title,
         url: url,
+        dialogClass:'modal-' + size,
         buttons: [{
             text: "确定",
             'class': "btn-default",

@@ -225,7 +225,7 @@ $(function() {
                 <i class="on md b-white bottom"></i>
                 </a>
               </span>
-              <span class="text-avatar text-muted text-xs block m-t-xs"><?php echo Auth::user()->nickname; ?></span>
+              <span class="text-avatar text-muted text-xs block m-t-xs"><?php echo Auth::user()->name; ?></span>
           </div>
 
 			<ul>

@@ -1,10 +1,10 @@
 <div class="panel no-border">
 
-@include('purchase/menu')
+@include('menus/purchase')
 
 <div class="wrapper-sm">
     <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
-    <a class="btn btn-sm btn-info" href="javascript:_submit();"> <i class="fa fa-check"></i> 提交</a>
+    <a class="btn btn-sm btn-info" href="javascript:_submit();"> <i class="fa fa-check"></i> 保存</a>
 </div>
 <div class="wrapper-sm b-t">
 
@@ -32,8 +32,8 @@
     </div>
     <div class="form-group">
         <div class="col-sm-12">
-            <label for="sort" class="control-label"><span class="red"> * </span> 采购员</label>
-            {{Dialog::select2('user','buyer', $row['buyer'], 0, 0)}}
+            <label for="user_id" class="control-label"><span class="red"> * </span> 采购员</label>
+            {{Dialog::select2('user','user_id', $row['user_id'], 0, 0)}}
         </div>
     </div>
 </div>
@@ -87,8 +87,8 @@ var rec_money = 0.00;
 
 $(function() {
 
-    select2List.buyer = $("#buyer");
-    select2List.buyer.select2Field({
+    select2List.user_id = $("#user_id");
+    select2List.user_id.select2Field({
         width: '153px',
         //multiple: true,
         ajax: {
@@ -263,7 +263,7 @@ function _submit() {
             $.toastr('error', '商品不能为空。', '错误');
             return;
         } else {
-            params.purchase_line = dataset.data;
+            params.stock_line = dataset.data;
         }
     } else {
         return;
@@ -294,11 +294,3 @@ function iframeResize() {
     t.jqGrid('resizeGrid');
 }
 </script>
-
-<!--
-<div class="panel-footer">
-    <button type="button" onclick="history.back();" class="btn btn-default">取消</button>
-    <button type="button" onclick="_submit();" class="btn btn-success"><i class="fa fa-check-circle"></i> 提交</button>
-</div>
--->
-    

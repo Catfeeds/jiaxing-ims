@@ -179,7 +179,7 @@ function search_form($params = [], $columns = [], $orders = [])
         foreach ($columns as $i => $column) {
             $forms['field'][$i]     = $column[1];
             $forms['condition'][$i] = '';
-            $forms['search'][$i]    = empty($column[3]) ? '' : $column[3];
+            $forms['search'][$i]    = empty($column[0]['value']) ? '' : $column[0]['value'];
             $forms['type'][$i]      = $column[0];
         }
     }
@@ -1102,9 +1102,9 @@ function action_log($table, $table_id, $uri, $edit, $title = '')
     $node   = $modules[$table];
 
     if ($table == 'work_process') {
-        $description = auth()->user()->nickname.'在'.date('Y-m-d H:i').$type.'了id为'.$table_id.'的'.$title;
+        $description = auth()->user()->name.'在'.date('Y-m-d H:i').$type.'了id为'.$table_id.'的'.$title;
     } else {
-        $description = auth()->user()->nickname.'在'.date('Y-m-d H:i').$type.'了id为'.$table_id.'的'.$node;
+        $description = auth()->user()->name.'在'.date('Y-m-d H:i').$type.'了id为'.$table_id.'的'.$node;
     }
 
     DB::table('action_log')->insert([

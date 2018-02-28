@@ -5,11 +5,9 @@ use Input;
 use Request;
 use Validator;
 
-use Aike\Web\Product\Stock;
-
-use Aike\Web\Supplier\Product;
-use Aike\Web\Supplier\ProductCategory;
-use Aike\Web\Supplier\Warehouse;
+use Aike\Web\Stock\Product;
+use Aike\Web\Stock\ProductCategory;
+use Aike\Web\Stock\Warehouse;
 
 use Aike\Web\Index\Controllers\DefaultController;
 
@@ -20,6 +18,8 @@ class ServiceController extends DefaultController
     // 产品列表
     public function indexAction()
     {
+        $stores = DB::table('store')->get(['id', 'name as text']);
+
         $columns = [[
             'name'     => 'name',
             'index'    => 'product.name',
@@ -63,7 +63,7 @@ class ServiceController extends DefaultController
             'index'    => 'store.name',
             'search'   => [
                 'type' => 'select',
-                'data' => [['id' => 1, 'text' => '22'],['id' => 0, 'text' => '11']],
+                'data' => $stores,
             ],
             'label'    => '所属门店',
             'width' => 160,
@@ -76,6 +76,7 @@ class ServiceController extends DefaultController
                 'type' => 'select',
                 'data' => [['id' => 1, 'text' => '是'],['id' => 0, 'text' => '否']],
             ],
+            'formatter' => 'select',
             'label'    => '是否共享',
             'width' => 160,
             'align'    => 'center',
@@ -119,8 +120,13 @@ class ServiceController extends DefaultController
 
         $model = Product::where('product.type', 2)
         ->LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
+        ->LeftJoin('store', 'store.id', '=', 'product.store_id')
         ->orderBy('product.id', 'asc')
-        ->select(['product.*', 'product_category.name as category_name']);
+        ->select([
+            'product.*',
+            'product_category.name as category_name',
+            'store.name as store_name'
+        ]);
 
         foreach ($search['where'] as $where) {
             if ($where['active']) {

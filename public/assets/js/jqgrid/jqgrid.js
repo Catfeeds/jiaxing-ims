@@ -225,13 +225,31 @@ $.extend($.fn.fmatter, {
 });
 
 $.extend($.fn.fmatter, {
-    actionlink: function(cellvalue, options, rowdata) {
+    actionLink: function(cellvalue, options, rowdata) {
         var formatoptions = options.colModel.formatoptions;
         var link = [];
         $.each(formatoptions, function(i, row) {
-            link.push('<a data-toggle="actionlink" class="option" data-action="'+ i +'" data-id="'+ rowdata.id +'" href="javascript:;">'+ row +'</a>');
+            link.push('<a data-toggle="actionLink" class="option" data-action="'+ i +'" data-id="'+ rowdata.id +'" href="javascript:actionLink(\''+i+'\','+ rowdata.id +');">'+ row +'</a>');
         });
         return link.join(' ');
+    }
+});
+
+$.extend($.fn.fmatter, {
+    select: function(value, options, rowdata) {
+        var rows = options.colModel.search.data;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].id == value) {
+                return rows[i].text;
+            }
+        }
+        return value;
+    }
+});
+    
+$.extend($.fn.fmatter.select, {    
+    unformat: function(value, options) {
+        return value;
     }
 });
 

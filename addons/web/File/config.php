@@ -1,6 +1,6 @@
 <?php 
 return [
-    "name" => "工作-工作文件-文件模块",
+    "name" => "文件",
     "order" => 33,
     "version" => "1.0",
     "description" => "文件查看下载，供大家下载资料的通用功能。",

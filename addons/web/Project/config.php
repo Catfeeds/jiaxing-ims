@@ -1,6 +1,6 @@
 <?php 
 return [
-    "name" => "项目管理",
+    "name" => "项目",
     "order" => 101,
     "version" => "1.0",
     "description" => "项目管理。",

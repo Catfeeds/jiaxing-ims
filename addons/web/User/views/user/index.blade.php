@@ -1,6 +1,6 @@
 <div class="panel no-border">
 
-    @include('menu')
+    @include('menus/user')
 
     @include('tabs')
 
@@ -17,7 +17,7 @@
                     <input type="checkbox" class="select-all">
                 </th>
                 <th align="left">姓名</th>
-                <th align="left">{{url_order($search,'username','账号')}}</th>
+                <th align="left">{{url_order($search,'login','账号')}}</th>
                 <th>部门</th>
                 <th>角色</th>
                 <th>手机</th>

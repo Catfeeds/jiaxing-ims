@@ -1,6 +1,6 @@
 <?php 
 return [
-    "name" => "资讯-企业公告",
+    "name" => "公告",
     "order" => 1,
     "version" => "1.0",
     "description" => "新闻公告，企业发布内部公告，支持提醒和阅读记录。",

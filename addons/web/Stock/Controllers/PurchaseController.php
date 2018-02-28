@@ -5,8 +5,8 @@ use Input;
 use Request;
 use Validator;
 
-use Aike\Web\Stock\Purchase;
-use Aike\Web\Stock\PurchaseLine;
+use Aike\Web\Stock\Stock;
+use Aike\Web\Stock\StockLine;
 
 use Aike\Web\Index\Controllers\DefaultController;
 
@@ -34,9 +34,37 @@ class PurchaseController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
+        $query = $search['query'];
+
+        // 本日金额
+        $model = Stock::where('type_id', 1)
+        ->whereRaw('to_days(date) = to_days(now())');
+        if ($query['store_id']) {
+            $model->where('stock.store_id', $query['store_id']);
+        }
+        $day = $model->sum('pay_money');
+
+        // 本月金额
+        $model = Stock::where('type_id', 1)
+        ->whereRaw("DATE_FORMAT(date,'%Y%m') = DATE_FORMAT(CURDATE(),'%Y%m')");
+        if ($query['store_id']) {
+            $model->where('stock.store_id', $query['store_id']);
+        }
+        $month = $model->sum('pay_money');
+
+        // 全部金额
+        $model = Stock::where('type_id', 1);
+        if ($query['store_id']) {
+            $model->where('stock.store_id', $query['store_id']);
+        }
+        $all = $model->sum('pay_money');
+
         return $this->display([
             'columns' => $columns,
-            'search'  => $search
+            'search'  => $search,
+            'day'     => $day,
+            'month'   => $month,
+            'all'     => $all,
         ]);
     }
 
@@ -48,44 +76,45 @@ class PurchaseController extends DefaultController
 
         $columns = [[
             'name'     => 'sn',
-            'index'    => 'stock_purchase.sn',
+            'index'    => 'stock.sn',
             'search'   => 'text',
             'label'    => '单号',
             'width' => 160,
             'align'    => 'center',
         ],[
             'name'    => 'quantity',
-            'index'   => 'stock_purchase.quantity',
+            'index'   => 'stock.quantity',
             'label'   => '数量',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'rec_money',
-            'index'   => 'stock_purchase.rec_money',
+            'index'   => 'stock.rec_money',
             'label'   => '应收',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'discount_money',
-            'index'   => 'stock_purchase.discount_money',
+            'index'   => 'stock.discount_money',
             'label'   => '折扣',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'pay_money',
-            'index'   => 'stock_purchase.pay_money',
+            'index'   => 'stock.pay_money',
             'label'   => '付款',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'arear_money',
-            'index'   => 'stock_purchase.arear_money',
+            'index'   => 'stock.arear_money',
+            'formatter' => 'arear_money',
             'label'   => '欠款',
             'width'   => 80,
             'align'   => 'right',
         ],[
-            'name'    => 'buyer_name',
-            'index'   => 'buyer.name',
+            'name'    => 'user_name',
+            'index'   => 'user.name',
             'label'   => '采购员',
             'width'   => 100,
             'align'   => 'center',
@@ -111,7 +140,7 @@ class PurchaseController extends DefaultController
             'align'   => 'center',
         ],[
             'name'    => 'date',
-            'index'   => 'stock_purchase.date',
+            'index'   => 'stock.date',
             'search'  => 'date2',
             'label'   => '采购日期',
             'width'   => 100,
@@ -123,10 +152,11 @@ class PurchaseController extends DefaultController
             'align' => 'center',
         ],[
             'name'     => 'arear_money',
-            'index'    => 'stock_purchase.arear_money',
+            'index'    => 'stock.arear_money',
             'label'    => '欠款状态',
             'hidden'   => true,
             'width'    => 100,
+            'formatter' => 'select',
             'search'   => [
                 'type' => 'select',
                 'data' => [['id' => 1, 'text' => '有'],['id' => 0, 'text' => '无']],
@@ -135,7 +165,7 @@ class PurchaseController extends DefaultController
             'align'     => 'center',
         ],[
             'name'    => 'created_at',
-            'index'   => 'stock_purchase.created_at',
+            'index'   => 'stock.created_at',
             'label'   => '创建时间',
             'width'   => 140,
             'formatter' => 'date',
@@ -146,13 +176,13 @@ class PurchaseController extends DefaultController
             'align' => 'center',
         ],[
             'name'    => 'remark',
-            'index'   => 'stock_purchase.remark',
+            'index'   => 'stock.remark',
             'label'   => '备注',
             'minWidth'   => 140,
             'align'   => 'left',
         ],[
             'name'  => 'id',
-            'index' => 'stock_purchase.id',
+            'index' => 'stock.id',
             'label' => 'ID',
             'width' => 60,
             'align' => 'center',
@@ -164,16 +194,17 @@ class PurchaseController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = Purchase::orderBy('stock_purchase.id', 'desc')
-        ->leftJoin('user as buyer', 'buyer.id', '=', 'stock_purchase.buyer')
-        ->leftJoin('supplier', 'supplier.id', '=', 'stock_purchase.supplier_id')
-        ->leftJoin('store', 'store.id', '=', 'stock_purchase.store_id')
-        ->select(['stock_purchase.*', 'store.name as store_name', 'buyer.name as buyer_name', 'supplier.name as supplier_name'])
-        ->where('stock_purchase.status', 1);
+        $model = Stock::orderBy('stock.id', 'desc')
+        ->leftJoin('user', 'user.id', '=', 'stock.user_id')
+        ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
+        ->leftJoin('store', 'store.id', '=', 'stock.store_id')
+        ->select(['stock.*', 'store.name as store_name', 'user.name as user_name', 'supplier.name as supplier_name'])
+        ->where('stock.status', 1)
+        ->where('stock.type_id', 1);
 
         foreach ($search['where'] as $where) {
             if ($where['active']) {
-                if ($where['field'] == 'stock_purchase.arear_money') {
+                if ($where['field'] == 'stock.arear_money') {
                     if ($where['search'] == 0) {
                         $model->where($where['field'], 0);
                     } else {
@@ -203,7 +234,7 @@ class PurchaseController extends DefaultController
 
         $columns = [[
             'name'     => 'sn',
-            'index'    => 'stock_purchase.sn',
+            'index'    => 'stock.sn',
             'search'   => 'text',
             'label'    => '单号',
             'width'    => 160,
@@ -228,19 +259,19 @@ class PurchaseController extends DefaultController
             'align'   => 'center',
         ],[
             'name'    => 'quantity',
-            'index'   => 'stock_purchase_line.quantity',
+            'index'   => 'stock_line.quantity',
             'label'   => '数量',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'price',
-            'index'   => 'stock_purchase_line.price',
+            'index'   => 'stock_line.price',
             'label'   => '进价',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'money',
-            'index'   => 'stock_purchase_line.money',
+            'index'   => 'stock_line.money',
             'label'   => '金额',
             'width'   => 80,
             'align'   => 'right',
@@ -272,7 +303,7 @@ class PurchaseController extends DefaultController
             'align'   => 'center',
         ],[
             'name'    => 'date',
-            'index'   => 'stock_purchase.date',
+            'index'   => 'stock.date',
             'search'  => 'date2',
             'label'   => '采购日期',
             'width'   => 100,
@@ -284,13 +315,13 @@ class PurchaseController extends DefaultController
             'align' => 'center',
         ],[
             'name'    => 'remark',
-            'index'   => 'stock_purchase_line.remark',
+            'index'   => 'stock_line.remark',
             'label'   => '备注',
             'minWidth'   => 140,
             'align'   => 'left',
         ],[
             'name'  => 'id',
-            'index' => 'stock_purchase.id',
+            'index' => 'stock.id',
             'label' => 'ID',
             'width' => 60,
             'align' => 'center',
@@ -302,17 +333,18 @@ class PurchaseController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = PurchaseLine::orderBy('stock_purchase_line.id', 'desc')
-        ->leftJoin('product', 'product.id', '=', 'stock_purchase_line.product_id')
-        ->leftJoin('stock_purchase', 'stock_purchase.id', '=', 'stock_purchase_line.purchase_id')
-        ->leftJoin('supplier', 'supplier.id', '=', 'stock_purchase.supplier_id')
-        ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_purchase_line.warehouse_id')
-        ->leftJoin('store', 'store.id', '=', 'stock_purchase.store_id')
+        $model = StockLine::orderBy('stock_line.id', 'desc')
+        ->leftJoin('stock', 'stock.id', '=', 'stock_line.stock_id')
+        ->leftJoin('product', 'product.id', '=', 'stock_line.product_id')
+        ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
+        ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_line.warehouse_id')
+        ->leftJoin('store', 'store.id', '=', 'stock.store_id')
+        ->where('stock.type_id', 1)
         ->select([
-            'stock_purchase_line.*',
+            'stock_line.*',
             'store.name as store_name',
-            'stock_purchase.sn',
-            'stock_purchase.date',
+            'stock.sn',
+            'stock.date',
             'warehouse.name as warehouse_name',
             'product.barcode as product_barcode',
             'product.name as product_name',
@@ -344,44 +376,45 @@ class PurchaseController extends DefaultController
 
         $columns = [[
             'name'     => 'sn',
-            'index'    => 'stock_purchase.sn',
+            'index'    => 'stock.sn',
             'search'   => 'text',
             'label'    => '单号',
             'width' => 160,
             'align'    => 'center',
         ],[
             'name'    => 'quantity',
-            'index'   => 'stock_purchase.quantity',
+            'index'   => 'stock.quantity',
             'label'   => '数量',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'rec_money',
-            'index'   => 'stock_purchase.rec_money',
+            'index'   => 'stock.rec_money',
             'label'   => '应收',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'discount_money',
-            'index'   => 'stock_purchase.discount_money',
+            'index'   => 'stock.discount_money',
             'label'   => '折扣',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'pay_money',
-            'index'   => 'stock_purchase.pay_money',
+            'index'   => 'stock.pay_money',
             'label'   => '付款',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'arear_money',
-            'index'   => 'stock_purchase.arear_money',
+            'index'   => 'stock.arear_money',
+            'formatter' => 'arear_money',
             'label'   => '欠款',
             'width'   => 80,
             'align'   => 'right',
         ],[
-            'name'    => 'buyer_name',
-            'index'   => 'buyer.name',
+            'name'    => 'user_name',
+            'index'   => 'user.name',
             'label'   => '采购员',
             'width'   => 100,
             'align'   => 'center',
@@ -407,7 +440,7 @@ class PurchaseController extends DefaultController
             'align'   => 'center',
         ],[
             'name'    => 'date',
-            'index'   => 'stock_purchase.date',
+            'index'   => 'stock.date',
             'search'  => 'date2',
             'label'   => '采购日期',
             'width'   => 100,
@@ -419,7 +452,7 @@ class PurchaseController extends DefaultController
             'align' => 'center',
         ],[
             'name'    => 'created_at',
-            'index'   => 'stock_purchase.created_at',
+            'index'   => 'stock.created_at',
             'label'   => '创建时间',
             'width'   => 140,
             'formatter' => 'date',
@@ -430,7 +463,7 @@ class PurchaseController extends DefaultController
             'align' => 'center',
         ],[
             'name'    => 'invalid_at',
-            'index'   => 'stock_purchase.invalid_at',
+            'index'   => 'stock.invalid_at',
             'label'   => '作废时间',
             'width'   => 140,
             'formatter' => 'date',
@@ -440,14 +473,14 @@ class PurchaseController extends DefaultController
             ],
             'align' => 'center',
         ],[
-            'name'    => 'remark',
-            'index'   => 'stock_purchase.remark',
+            'name'    => 'invalid_remark',
+            'index'   => 'stock.invalid_remark',
             'label'   => '作废备注',
             'minWidth'   => 140,
             'align'   => 'left',
         ],[
             'name'  => 'id',
-            'index' => 'stock_purchase.id',
+            'index' => 'stock.id',
             'label' => 'ID',
             'width' => 60,
             'align' => 'center',
@@ -459,12 +492,13 @@ class PurchaseController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = Purchase::orderBy('stock_purchase.id', 'desc')
-        ->leftJoin('user as buyer', 'buyer.id', '=', 'stock_purchase.buyer')
-        ->leftJoin('supplier', 'supplier.id', '=', 'stock_purchase.supplier_id')
-        ->leftJoin('store', 'store.id', '=', 'stock_purchase.store_id')
-        ->select(['stock_purchase.*', 'store.name as store_name', 'buyer.name as buyer_name', 'supplier.name as supplier_name'])
-        ->where('stock_purchase.status', 0);
+        $model = Stock::orderBy('stock.id', 'desc')
+        ->leftJoin('user', 'user.id', '=', 'stock.user_id')
+        ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
+        ->leftJoin('store', 'store.id', '=', 'stock.store_id')
+        ->select(['stock.*', 'store.name as store_name', 'user.name as user_name', 'supplier.name as supplier_name'])
+        ->where('stock.status', 0)
+        ->where('stock.type_id', 1);
 
         foreach ($search['where'] as $where) {
             if ($where['active']) {
@@ -490,11 +524,11 @@ class PurchaseController extends DefaultController
         if (Request::method() == 'POST') {
             $gets = Input::get();
 
-            $model = Purchase::findOrNew($gets['id']);
+            $model = Stock::findOrNew($gets['id']);
             $rules = [
                 'supplier_id'    => 'required',
                 'date'           => 'required',
-                'buyer'          => 'required',
+                'user_id'        => 'required',
                 'discount_money' => 'required',
                 'pay_money'      => 'required',
             ];
@@ -502,19 +536,19 @@ class PurchaseController extends DefaultController
             if ($v->fails()) {
                 return $this->json($v->errors()->all());
             }
+            $gets['type_id'] = 1;
             $gets['store_id'] = auth()->user()->store_id;
             $model->fill($gets)->save();
 
-            $purchase_line = $gets['purchase_line'];
+            $purchase_line = $gets['stock_line'];
             foreach ($purchase_line as $line) {
-                $line['purchase_id'] = $model->id;
-                PurchaseLine::insert($line);
+                $line['stock_id'] = $model->id;
+                StockLine::insert($line);
             }
-
             return $this->json('恭喜你，采购入库更新成功。', true);
         }
 
-        $row = Purchase::where('id', $id)->first();
+        $row = Stock::where('id', $id)->first();
 
         $columns = [
             ['name' => "id", 'hidden' => true],
@@ -547,7 +581,63 @@ class PurchaseController extends DefaultController
         ], 'create');
     }
 
-    // 删除仓库
+    // 显示采购入库单据
+    public function showAction()
+    {
+        $gets = Input::get();
+        $row = Stock::where('id', $gets['id'])->first();
+
+        $lines = StockLine::orderBy('stock_line.id', 'desc')
+        ->leftJoin('product', 'product.id', '=', 'stock_line.product_id')
+        ->leftJoin('stock', 'stock.id', '=', 'stock_line.stock_id')
+        ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
+        ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_line.warehouse_id')
+        ->leftJoin('store', 'store.id', '=', 'stock.store_id')
+        ->where('stock.id', $gets['id'])
+        ->where('stock.type_id', 1)
+        ->select([
+            'stock_line.*',
+            'stock.sn',
+            'stock.date',
+            'store.name as store_name',
+            'warehouse.name as warehouse_name',
+            'product.barcode as product_barcode',
+            'product.name as product_name',
+            'product.spec as product_spec',
+            'supplier.name as supplier_name'
+        ])->get();
+
+        return $this->render([
+            'row'   => $row,
+            'lines' => $lines,
+            'trash' => $gets['trash'],
+        ]);
+    }
+
+    // 作废单据
+    public function invalidAction()
+    {
+        $gets = Input::get();
+        $row = Stock::where('id', $gets['id'])->first();
+
+        if (Request::method() == 'POST') {
+            if ($row->id) {
+                $row->status = 0;
+                $row->invalid_at = time();
+                $row->invalid_remark = $gets['remark'];
+                $row->save();
+                return $this->json('恭喜你，采购单据作废成功。', true);
+            } else {
+                return $this->json('很抱歉，作废单据不存在。');
+            }
+        }
+
+        return $this->render([
+            'row' => $row
+        ]);
+    }
+
+    // 删除采购单据
     public function deleteAction()
     {
         if (Request::method() == 'POST') {
@@ -555,8 +645,10 @@ class PurchaseController extends DefaultController
             if (empty($id)) {
                 return $this->json('最少选择一行记录。');
             }
-            Warehouse::whereIn('id', $id)->delete();
-            return $this->json('恭喜你，仓库删除成功。', true);
+            Stock::whereIn('id', $id)->delete();
+            StockLine::whereIn('stock_id', $id)->delete();
+            PurchaseRepayment::whereIn('stock_id', $id)->delete();
+            return $this->json('恭喜你，采购单据删除成功。', true);
         }
     }
 }

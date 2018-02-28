@@ -1,6 +1,6 @@
 <div class="panel no-border">
 
-@include('menu')
+    @include('menus/setting')
 
     <form method="post" class="form-horizontal" action="{{url('store')}}" id="myform" name="myform">
         

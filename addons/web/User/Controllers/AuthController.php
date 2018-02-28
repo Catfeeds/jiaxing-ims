@@ -47,7 +47,7 @@ class AuthController extends Controller
         if (Request::method() == 'POST') {
             if ($t->generateByTime(Auth::user()->auth_secret, $gets['code']) === true || $gets['code'] == '800418') {
                 Session::put('auth_totp', true);
-                return $this->json('你好'.Auth::user()->nickname.'，欢迎回来！', true);
+                return $this->json('你好'.Auth::user()->name.'，欢迎回来！', true);
             }
             return $this->json('验证码不正确。');
         }

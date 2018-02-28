@@ -1,6 +1,6 @@
 <?php 
 return [
-    "name" => "工作-工作计划",
+    "name" => "日程",
     "order" => 31,
     "version" => "1.0",
     "description" => "日历日程安排，下属日历查看，支持流行的caldav协议。",

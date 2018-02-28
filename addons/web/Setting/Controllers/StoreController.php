@@ -43,11 +43,12 @@ class StoreController extends DefaultController
             'width'   => 160,
             'align'   => 'left',
         ],[
-            'name'    => 'main',
-            'index'   => 'store.main',
-            'search'   => [
-                'type' => 'select',
-                'data' => [['id' => 1, 'text' => '是'],['id' => 0, 'text' => '否']],
+            'name'      => 'main',
+            'index'     => 'store.main',
+            'formatter' => 'select',
+            'search'    => [
+                'type'  => 'select',
+                'data'  => [['id' => 1, 'text' => '是'],['id' => 0, 'text' => '否']],
             ],
             'label'   => '是否总店',
             'width'   => 80,

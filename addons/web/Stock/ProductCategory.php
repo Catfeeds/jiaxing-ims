@@ -1,8 +1,8 @@
 <?php namespace Aike\Web\Stock;
 
-use Aike\Web\Supplier\ProductCategory as BaseCategory;
+use Aike\Web\Index\BaseModel;
 
-class ProductCategory extends BaseCategory
+class ProductCategory extends BaseModel
 {
     protected $table = 'product_category';
 

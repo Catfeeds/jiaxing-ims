@@ -1,6 +1,6 @@
 <div class="panel no-border">
 
-    @include('menu')
+    @include('menus/user')
 
     <div class="wrapper-sm">
 

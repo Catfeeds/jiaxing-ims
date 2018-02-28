@@ -224,14 +224,14 @@
         self._date2 = function(i, id, space) {
             var a0 = attr(i, 0);
             var a1 = attr(i, 1);
-            var e = $('<input name="'+a0.name+'" id="'+a0.id+'" value="'+a0.value+'" type="text" data-toggle="date" class="form-control input-sm"> - <input name="'+a1.name+'" id="'+a1.id+'" value="'+a1.value+'" type="text" data-toggle="date" class="form-control input-sm">');
+            var e = $('<table class="table"><tr><td><input name="'+a0.name+'" id="'+a0.id+'" value="'+a0.value+'" type="text" data-toggle="date" class="form-control input-sm"></td><td class="date-apart"> - </td><td><input name="'+a1.name+'" id="'+a1.id+'" value="'+a1.value+'" type="text" data-toggle="date" class="form-control input-sm"></td></tr></table>');
             element[i].value.append(e);
         }
 
         self._second2 = function(i, id, space) {
             var a0 = attr(i, 0);
             var a1 = attr(i, 1);
-            var e = $('<table class="table"><tr><td><input name="'+a0.name+'" id="'+a0.id+'" value="'+a0.value+'" type="text" data-toggle="date" class="form-control input-sm"></td><td class="date-apart">至</td><td><input name="'+a1.name+'" id="'+a1.id+'" value="'+a1.value+'" type="text" data-toggle="date" class="form-control input-sm"></td></tr></table>');
+            var e = $('<table class="table"><tr><td><input name="'+a0.name+'" id="'+a0.id+'" value="'+a0.value+'" type="text" data-toggle="date" class="form-control input-sm"></td><td class="date-apart"> - </td><td><input name="'+a1.name+'" id="'+a1.id+'" value="'+a1.value+'" type="text" data-toggle="date" class="form-control input-sm"></td></tr></table>');
             element[i].value.append(e);
         }
 

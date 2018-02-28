@@ -1,19 +1,11 @@
 <div class="panel no-border">
 
-    @include('purchase/menu')
+    @include('menus/purchase')
 
     <div class="wrapper-sm">
 
         <div class="btn-group">
-            <!--
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('create');"><i class="fa fa-plus"></i> 新建</a>
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('edit');"><i class="fa fa-edit"></i> 编辑</a>
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('delete');"><i class="fa fa-remove"></i> 删除</a>
-            -->
         </div>
-        <!--
-        <a class="btn btn-sm btn-default" href="javascript:actionLink('export');"><i class="fa fa-share"></i> 导出</a>
-        -->
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
     
     </div>
@@ -40,11 +32,6 @@
 <script>
 var routes = {
     index: 'stock/purchase/line',
-    create: 'stock/purchase/create',
-    delete: 'stock/purchase/delete',
-    edit: 'stock/purchase/edit',
-    show: 'stock/purchase/show',
-    export: 'stock/purchase/export',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};
@@ -93,7 +80,7 @@ var searchSimple = null;
         colModel: model,
         rowNum: 25,
         autowidth: true,
-        multiselect: true,
+        multiselect: false,
         viewrecords: true,
         rownumbers: false,
         width: '100%',
@@ -102,8 +89,6 @@ var searchSimple = null;
         postData: params,
         pager: '#jqgrid-page',
         ondblClickRow: function(rowid) {
-            var row = $(this).getRowData(rowid);
-            actionLink('edit', row.id);
         },
         gridComplete: function() {
             $(this).jqGrid('setColsWidth');
@@ -113,84 +98,6 @@ var searchSimple = null;
 })(jQuery);
 
 function actionLink(action, id) {
-
-    if(action == 'export') {
-        $table.jqGrid('exportGrid');
-        return;
-    }
-
-    if(action == 'show') {
-        viewBox('show','查看', app.url(routes.show, {id: id}));
-        return;
-    }
-
-    if(action == 'create') {
-        formBox('新建', app.url(routes.create), 'stock-warehouse-form', function(res) {
-            if(res.status) {
-                $.toastr('success', res.data, '提醒');
-                $table.jqGrid('setGridParam', {
-                    postData: params,
-                    page: 1
-                }).trigger('reloadGrid');
-                $(this).dialog("close");
-            } else {
-                $.toastr('error', res.data, '提醒');
-            }
-        });
-        return;
-    }
-
-    if(action == 'edit') {
-        if(id == undefined) {
-            var selections = $table.jqGrid('getSelections');
-            if(selections.length) {
-                id = selections[0].id;
-            } else {
-                $.toastr('error', '必须选择一行记录。', '错误');
-                return;
-            }
-        }
-        formBox('编辑', app.url(routes.edit, {id: id}), 'stock-warehouse-form', function(res) {
-            if(res.status) {
-                $.toastr('success', res.data, '提醒');
-                $table.jqGrid('setGridParam', {
-                    postData: params,
-                    page: 1
-                }).trigger('reloadGrid');
-                $(this).dialog("close");
-            } else {
-                $.toastr('error', res.data, '提醒');
-            }
-        });
-        return;
-    }
-
-    if(action == 'delete') {
-        var selections = $table.jqGrid('getSelections');
-        var query = [];
-        $.each(selections, function(i, selection) {
-            query.push(selection.id);
-        });
-        if(query.length) {
-            $.messager.confirm('操作确认', '确定要删除吗？', function() {
-                $.post(app.url(routes.delete), {id: query}, function(res) {
-                    if(res.status) {
-                        $.toastr('success', res.data, '提醒');
-                        $table.jqGrid('setGridParam', {
-                            postData: params,
-                            page: 1
-                        }).trigger('reloadGrid');
-                    } else {
-                        $.toastr('error', res.data, '提醒');
-                    }
-                });
-            });
-
-        } else {
-            $.toastr('error', '最少选择一行记录。', '错误');
-        }
-        return;
-    }
 
     if(action == 'filter') {
         // 过滤数据

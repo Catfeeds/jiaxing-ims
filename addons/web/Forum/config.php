@@ -1,6 +1,6 @@
 <?php 
 return [
-    "name" => "资讯-交流平台",
+    "name" => "论坛",
     "order" => 4,
     "version" => "1.0",
     "description" => "论坛管理",

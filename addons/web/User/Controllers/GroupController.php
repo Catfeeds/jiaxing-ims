@@ -26,21 +26,9 @@ class GroupController extends DefaultController
             'label'   => '排序',
             'width'   => 120,
             'align'   => 'center',
-        ]/*,[
-            'name'     => 'status',
-            'index'    => 'user_group.status',
-            'label'    => '状态',
-            'width'    => 100,
-            'search'   => [
-                'type' => 'select',
-                'data' => ['1' => '启用', '0' => '停用'],
-            ],
-            'formatter' => 'status',
-            'align'     => 'center',
-        ]*/,[
+        ],[
             'name'    => 'updated_at',
             'index'   => 'user_group.updated_at',
-            //'search'  => 'second2',
             'label'   => '操作时间',
             'width'   => 140,
             'formatter' => 'date',

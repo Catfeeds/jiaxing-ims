@@ -42,22 +42,14 @@ class User extends BaseModel implements
         return $this->belongsTo('Aike\Web\User\Department');
     }
 
-    /**
-     * 客户信息
-     */
-    public function customer()
+    public function leader()
     {
-        return $this->hasOne('Aike\Web\Customer\Customer');
+        return $this->belongsTo('Aike\Web\User\User', 'leader_id');
     }
 
     public function role()
     {
         return $this->belongsTo('Aike\Web\User\Role');
-    }
-
-    public function hr()
-    {
-        return $this->hasOne('Aike\Web\Hr\Hr');
     }
 
     public function position()
@@ -199,6 +191,6 @@ class User extends BaseModel implements
             if ($scope['u']) {
                 $q->orwhereIn('id', $scope['u']);
             }
-        })->get(['id', 'role_id', 'username', 'nickname', 'email', 'mobile']);
+        })->get(['id', 'role_id', 'login', 'name', 'email', 'mobile']);
     }
 }

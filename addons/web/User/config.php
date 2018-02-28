@@ -1,6 +1,6 @@
 <?php 
 return [
-    "name" => "设置-用户-组织架构",
+    "name" => "组织架构",
     "order" => 254,
     "version" => "1.0",
     "description" => "账户、职位、角色权限、部门管理。",

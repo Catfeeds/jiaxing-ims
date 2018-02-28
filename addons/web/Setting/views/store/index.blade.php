@@ -2,7 +2,7 @@
 
 <div class="panel no-border">
 
-    @include('menu')
+    @include('menus/setting')
 
     <div class="wrapper-sm">
 

@@ -5,8 +5,8 @@ use Input;
 use Request;
 use Validator;
 
-use Aike\Web\Supplier\ProductCategory;
-use Aike\Web\Supplier\Warehouse;
+use Aike\Web\Stock\ProductCategory;
+use Aike\Web\Stock\Warehouse;
 
 use Aike\Web\Index\Controllers\DefaultController;
 

@@ -1,9 +1,9 @@
 <?php 
 return [
-    "name" => "模块管理",
+    "name" => "模型管理",
     "order" => 255,
     "version" => "1.0",
-    "description" => "模块管理",
+    "description" => "模型管理",
     "icons" => [
         16 => "images/16.png",
         48 => "images/48.png",

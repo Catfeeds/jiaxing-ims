@@ -23,8 +23,10 @@ class Menu extends BaseModel
             ['id' =>'cashier_cashier', 'parent' => 'cashier', 'name' => '收银开单', 'url' => 'cashier/cashier/index'],
             
             ['id' =>'stock', 'name' => '库存', 'icon' => 'fa-cube'],
-            ['id' =>'stock_stock', 'parent' => 'stock', 'name' => '基础设置', 'url' => 'stock/stock/guide'],
+            //['id' =>'stock_stock', 'parent' => 'stock', 'name' => '基础设置', 'url' => 'stock/stock/guide'],
             ['id' =>'stock_purchase', 'parent' => 'stock', 'name' => '采购入库', 'url' => 'stock/purchase/guide'],
+            ['id' =>'stock_stock', 'parent' => 'stock', 'name' => '库存统计', 'url' => 'stock/stock/count'],
+            ['id' =>'stock_requisition', 'parent' => 'stock', 'name' => '领料出库', 'url' => 'stock/requisition/guide'],
             ['id' =>'stock_supplier', 'parent' => 'stock', 'name' => '供应商管理', 'url' => 'stock/supplier/index'],
             ['id' =>'stock_warehouse', 'parent' => 'stock', 'name' => '仓库管理', 'url' => 'stock/warehouse/index'],
             ['id' =>'stock_product', 'parent' => 'stock', 'name' => '商品管理', 'url' => 'stock/product/index'],
@@ -32,7 +34,7 @@ class Menu extends BaseModel
         
             ['id' =>'setting', 'name' => '设置', 'icon' => 'fa-gear'],
             ['id' =>'setting_setting', 'parent' => 'setting', 'name' => '系统设置', 'url' => 'setting/setting/index'],
-            ['id' =>'setting_user', 'parent' => 'setting', 'name' => '组织架构', 'url' => 'user/group/index'],
+            ['id' =>'setting_user', 'parent' => 'setting', 'name' => '组织架构', 'url' => 'user/user/index'],
             //['id' =>'setting_user_index', 'parent' => 'setting_user', 'name' => '用户管理', 'url' => 'user/group/index'],
             //['id' =>'setting_role_index', 'parent' => 'setting_user', 'name' => '角色管理', 'url' => 'user/role/index'],
             ['id' =>'setting_option', 'parent' => 'setting', 'name' => '科目设置', 'url' => 'setting/option/index'],

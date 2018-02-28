@@ -97,33 +97,6 @@ return [
                 ]
             ]
         ],
-        "stock" => [
-            "name" => "库存管理",
-            "actions" => [
-                "index" => [
-                    "name" => "进出存列表",
-                    "access" => 1
-                ],
-                "create" => [
-                    "name" => "成品出入库单"
-                ],
-                "report" => [
-                    "name" => "进出存汇总表"
-                ],
-                "view" => [
-                    "name" => "查看"
-                ],
-                "merge" => [
-                    "name" => "合并"
-                ],
-                "export" => [
-                    "name" => "导出"
-                ],
-                "delete" => [
-                    "name" => "删除"
-                ]
-            ]
-        ],
         "warehouse" => [
             "name" => "仓库类别",
             "actions" => [
@@ -167,21 +140,90 @@ return [
                 "index" => [
                     "name" => "列表"
                 ],
+                "show" => [
+                    "name" => "显示"
+                ],
                 "line" => [
                     "name" => "明细"
                 ],
                 "create" => [
                     "name" => "新建"
                 ],
-                "edit" => [
-                    "name" => "编辑"
-                ],
                 "trash" => [
-                    "name" => "回收站"
+                    "name" => "回收"
+                ],
+                "invalid" => [
+                    "name" => "作废"
                 ],
                 "delete" => [
                     "name" => "删除"
                 ]
+            ]
+        ],
+        "purchase-repayment" => [
+            "name" => "采购还款",
+            "actions" => [
+                "index" => [
+                    "name" => "列表"
+                ],
+                "create" => [
+                    "name" => "新建"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "requisition" => [
+            "name" => "领料",
+            "actions" => [
+                "guide" => [
+                    "name" => "引导"
+                ],
+                "index" => [
+                    "name" => "列表"
+                ],
+                "show" => [
+                    "name" => "显示"
+                ],
+                "line" => [
+                    "name" => "明细"
+                ],
+                "create" => [
+                    "name" => "新建"
+                ],
+                "trash" => [
+                    "name" => "回收"
+                ],
+                "invalid" => [
+                    "name" => "作废"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "stock" => [
+            "name" => "库存",
+            "actions" => [
+                "count" => [
+                    "name" => "库存统计"
+                ],
+                "index" => [
+                    "name" => "库存列表"
+                ],
+                "warning" => [
+                    "name" => "库存预警"
+                ],
+                "line" => [
+                    "name" => "收发明细"
+                ],
+                "warningEdit" => [
+                    "name" => "设置预警"
+                ],
+                "cost" => [
+                    "name" => "修改成本"
+                ],
             ]
         ]
     ]

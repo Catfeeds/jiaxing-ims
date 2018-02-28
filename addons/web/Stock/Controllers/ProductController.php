@@ -5,11 +5,9 @@ use Input;
 use Request;
 use Validator;
 
-use Aike\Web\Product\Stock;
-
-use Aike\Web\Supplier\Product;
-use Aike\Web\Supplier\ProductCategory;
-use Aike\Web\Supplier\Warehouse;
+use Aike\Web\Stock\Product;
+use Aike\Web\Stock\ProductCategory;
+use Aike\Web\Stock\Warehouse;
 
 use Aike\Web\Index\Controllers\DefaultController;
 
@@ -20,67 +18,7 @@ class ProductController extends DefaultController
     // 产品列表
     public function indexAction()
     {
-        /*
-        // 更新排序
-        if (Request::method() == 'POST') {
-            $gets = Input::get('id');
-            foreach ($gets as $id => $sort) {
-                Product::where('id', $id)->update(['sort' => $sort]);
-            }
-        }
-
-        $search = search_form([
-            'status'  => 1,
-            'referer' => 1,
-        ], [
-            ['text','product.name','商品名称'],
-            ['text','product.stock_code','存货编码'],
-            ['category','product.category_id','商品类别'],
-            ['warehouse','product.warehouse_id','默认仓库'],
-            ['text','product.id','商品ID'],
-        ]);
-
-        $query  = $search['query'];
-
-        $model = Product::LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
-        ->where('product_category.type', 1)
-        ->where('product.status', $query['status'])
-        ->orderBy('product_category.lft', 'asc')
-        ->orderBy('product.sort', 'asc');
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                if ($where['field'] == 'product.category_id') {
-                    $category = ProductCategory::where('id', $where['search'])->first();
-                    $model->whereBetween('product_category.lft', [$category->lft, $category->rgt]);
-                } elseif ($where['field'] == 'product.warehouse_id') {
-                    $warehouse = Warehouse::where('id', $where['search'])->first();
-                //$model->whereBetween('psw.lft', [$warehouse->lft, $warehouse->rgt]);
-                } else {
-                    $model->search($where);
-                }
-            }
-        }
-
-        $rows = $model->select(['product.*', 'product_category.title as category_name'])
-        ->paginate($search['limit'])->appends($query);
-
-        $_categorys = ProductCategory::type('sale')->orderBy('lft', 'asc')->get()->toNested();
-        $warehouse = Warehouse::type('sale')->orderBy('lft', 'asc')->get()->toNested();
-
-        $categorys = [];
-        foreach ($_categorys as $_category) {
-            $categorys[] = $_category;
-        }
-
-        return $this->display(array(
-            'rows'      => $rows,
-            'categorys' => $categorys,
-            'warehouse' => $warehouse,
-            'query'     => $query,
-            'search'    => $search,
-        ));
-        */
+        $stores = DB::table('store')->get(['id', 'name as text']);
 
         $columns = [[
             'name'     => 'name',
@@ -125,19 +63,20 @@ class ProductController extends DefaultController
             'index'    => 'store.name',
             'search'   => [
                 'type' => 'select',
-                'data' => [['id' => 1, 'text' => '22'],['id' => 0, 'text' => '11']],
+                'data' => $stores,
             ],
+            'formatter' => 'select',
             'label'    => '所属门店',
             'width' => 160,
             'align'    => 'center',
         ],[
             'name'     => 'is_share',
             'index'    => 'product.is_share',
-            'formatter' => 'is_share',
             'search'   => [
                 'type' => 'select',
                 'data' => [['id' => 1, 'text' => '是'],['id' => 0, 'text' => '否']],
             ],
+            'formatter' => 'select',
             'label'    => '是否共享',
             'width' => 160,
             'align'    => 'center',
@@ -237,11 +176,15 @@ class ProductController extends DefaultController
         }
         */
 
-
         $model = Product::where('product.type', 1)
         ->LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
+        ->LeftJoin('store', 'store.id', '=', 'product.store_id')
         ->orderBy('product.id', 'asc')
-        ->select(['product.*', 'product_category.name as category_name']);
+        ->select([
+            'product.*',
+            'product_category.name as category_name',
+            'store.name as store_name'
+        ]);
 
         foreach ($search['where'] as $where) {
             if ($where['active']) {
@@ -481,7 +424,7 @@ class ProductController extends DefaultController
             warehouse.id as warehouse_id
             ")->paginate($query['limit']);
 
-            $lasts = DB::select('select * from stock_purchase_line where id in (select max(id) from stock_purchase_line group by product_id) order by stock_purchase_line.id desc');
+            $lasts = DB::select('select * from stock_line where id in (select max(id) from stock_line group by product_id) order by stock_line.id desc');
             $lasts = array_by($lasts, 'product_id');
 
             $rows->transform(function ($row) use ($lasts) {

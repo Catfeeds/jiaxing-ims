@@ -47,7 +47,7 @@
         <tr>
             <td align="right">直属领导:</td>
             <td align="left">
-                {{get_user($res['leader_id'], 'name')}}
+                {{$res->leader->name}}
             </td>
 
             <td align="right">职位:</td>
