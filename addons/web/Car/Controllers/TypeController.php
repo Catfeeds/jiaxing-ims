@@ -63,17 +63,16 @@ class TypeController extends DefaultController
         exit;
         */
 
-        $model = Type::LeftJoin('car_brand', 'car_brand.id', '=', 'car_type.brand_id');
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
-        $model->select(['car_type.*', 'car_brand.name as brand_name']);
-
         if (Input::ajax()) {
+            $model = Type::LeftJoin('car_brand', 'car_brand.id', '=', 'car_type.brand_id');
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
+
+            $model->select(['car_type.*', 'car_brand.name as brand_name']);
             return response()->json($model->paginate($search['limit']));
         }
 

@@ -1,10 +1,10 @@
 <div class="panel no-border">
 
-@include('menus/purchase')
+@include('tabs', ['tabKey' => 'stock.purchase'])
 
 <div class="wrapper-sm">
     <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
-    <a class="btn btn-sm btn-info" href="javascript:_submit();"> <i class="fa fa-check"></i> 保存</a>
+    <a class="btn btn-sm btn-info" href="javascript:formStore();"> <i class="fa fa-check"></i> 保存</a>
 </div>
 <div class="wrapper-sm b-t">
 
@@ -52,7 +52,7 @@
     <div class="form-group">
     <div class="col-sm-12">
     <label for="sort" class="control-label">应收金额</label>
-    <input type="text" name="rec_money" readonly="readonly" value="{{$row['rec_money']}}" id="rec_money" class="form-control input-sm money">
+    <input type="text" name="total_money" readonly="readonly" value="{{$row['total_money']}}" id="total_money" class="form-control input-sm money">
     </div></div>
     <div class="form-group">
     <div class="col-sm-12">
@@ -67,12 +67,13 @@
     <div class="form-group">
     <div class="col-sm-12">
     <label for="sort" class="control-label">本次欠款</label>
-    <input type="text" name="arear_money" id="arear_money" readonly="readonly" value="{{$row['arear_money']}}" class="form-control input-sm money">
+    <input type="text" name="arrear_money" id="arrear_money" readonly="readonly" value="{{$row['arrear_money']}}" class="form-control input-sm money">
     </div></div>
 </div>
+
 </div>
 
-<input type="hidden" name="quantity" id="total_quantity" value="0" />
+<input type="hidden" name="total_quantity" id="total_quantity" value="0" />
 
 </form>
 
@@ -82,41 +83,28 @@
 
 var t = null;
 var columns = {{json_encode($columns)}};
-var select2List = {};
-var rec_money = 0.00;
+var receivable_money = 0.00;
 
 $(function() {
 
-    select2List.user_id = $("#user_id");
-    select2List.user_id.select2Field({
-        width: '153px',
-        //multiple: true,
-        ajax: {
-            url: '/user/user/dialog'
-        }
-    });
-
-    select2List.supplier_id = $("#supplier_id");
-    select2List.supplier_id.select2Field({
-        ajax: {
-            url: '/stock/supplier/dialog'
-        }
+    $.each(select2List, function(key, row) {
+        select2List[key].el = $('#' + key).select2Field(row.options);
     });
 
     var footerCalculate = function(rowid) {
 
-        var price = $(this).jqGrid('getCell', rowid, 'price');
-        var quantity = $(this).jqGrid('getCell', rowid, 'quantity');
-        $(this).jqGrid('setCell', rowid, 'money', quantity * price);
+        var cost_price = $(this).jqGrid('getCell', rowid, 'cost_price');
+        var quantity   = $(this).jqGrid('getCell', rowid, 'quantity');
+        $(this).jqGrid('setCell', rowid, 'cost_money', quantity * cost_price);
         
-        var quantity = $(this).getCol('quantity', false, 'sum');
-        var money = $(this).getCol('money', false, 'sum');
+        var quantity   = $(this).getCol('quantity', false, 'sum');
+        var cost_money = $(this).getCol('cost_money', false, 'sum');
         
         $('#total_quantity').val(quantity);
 
-        sumMoney(money, 'rec');
+        totalSum(cost_money, 'total');
 
-        $(this).footerData('set',{product_name:'合计:', quantity: quantity, money: money});
+        $(this).footerData('set',{product_name:'合计:', quantity: quantity, cost_money: cost_money});
     }
 
     t = $('#grid-table').jqGrid({
@@ -148,23 +136,26 @@ $(function() {
                         dataInit: $.jgrid.celledit.dialog({
                             srcField: 'product_id',
                             mapField: {
-                                category_name:'category_name',
                                 warehouse_name:'warehouse_name',
-                                warehouse_id:'warehouse_id',
-                                product_spec:'spec', 
-                                product_id:'id',
-                                product_name:'name',
-                                product_code:'barcode',
-                                product_spec:'spec',
+                                category_name:'category_name',
+                                product_name:'product_name',
+                                product_barcode:'product_barcode',
+                                product_spec:'product_spec',
+                                product_unit:'product_unit',
                                 last_price:'last_price',
+                                
+                                warehouse_id:'warehouse_id',
+                                product_id:'product_id',
+                                price:'product_price',
+                                quantity: 1,
                             },
                             suggest: {
-                                url: 'stock/product/dialog',
+                                url: 'stock/stock-warehouse/dialog',
                                 params: {order:'asc', limit:1000}
                             },
                             dialog: {
                                 title: '商品管理',
-                                url: 'stock/product/dialog',
+                                url: 'stock/stock-warehouse/dialog',
                                 params: {}
                             }
                         })
@@ -202,10 +193,8 @@ $(function() {
         },
         // 保存在本地的时候调用
         afterSaveCell: function(rowid, cellname, value, iRow, iCol) {
-
             // 计算页脚数据
             footerCalculate.call(this, rowid);
-
             // 编辑cell后保存时删除class
             $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
         }
@@ -221,40 +210,40 @@ $(function() {
 
         var money = $(this).val();
         if(this.id == 'discount_money') {
-            sumMoney(money, 'discount');
+            totalSum(money, 'discount');
         }
         if(this.id == 'pay_money') {
-            sumMoney(money, 'pay');
+            totalSum(money, 'pay');
         }
     });
 
 });
 
-function sumMoney(money, type) {
-    if(type == 'rec') {
-        $('#rec_money').val(money);
+function totalSum(money, type) {
+    if(type == 'total') {
+        $('#total_money').val(money);
         $('#pay_money').val(money);
         $('#discount_money').val(0);
-        $('#arear_money').val(0);
+        $('#arrear_money').val(0);
     }
     if(type == 'pay') {
-        var rec       = $('#rec_money').val();
+        var total       = $('#total_money').val();
         var discount  = $('#discount_money').val();
-        $('#arear_money').val(rec - money - discount);
+        $('#arrear_money').val(total - money - discount);
     }
     if(type == 'discount') {
-        var rec = $('#rec_money').val();
-        $('#pay_money').val(rec - money);
-        $('#arear_money').val(0);
+        var total = $('#total_money').val();
+        $('#pay_money').val(total - money);
+        $('#arrear_money').val(0);
     }
 }
 
-function _submit() {
+function formStore() {
 
     var params = {};
 
     $.each(select2List, function(k, v) {
-        params[k] = v.select2('val');
+        params[k] = v.el.select2('val');
     });
 
     var dataset = t.jqGrid('getRowsData');

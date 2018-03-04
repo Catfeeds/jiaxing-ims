@@ -94,15 +94,14 @@ class SupplierController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = Supplier::query();
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
+            $model = Supplier::query();
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
             return response()->json($model->paginate($search['limit']));
         }
 

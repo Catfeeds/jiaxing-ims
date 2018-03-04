@@ -176,28 +176,27 @@ class ProductController extends DefaultController
         }
         */
 
-        $model = Product::where('product.type', 1)
-        ->LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
-        ->LeftJoin('store', 'store.id', '=', 'product.store_id')
-        ->orderBy('product.id', 'asc')
-        ->select([
-            'product.*',
-            'product_category.name as category_name',
-            'store.name as store_name'
-        ]);
+        if (Input::ajax()) {
+            $model = Product::where('product.type', 1)
+            ->LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
+            ->LeftJoin('store', 'store.id', '=', 'product.store_id')
+            ->orderBy('product.id', 'asc')
+            ->select([
+                'product.*',
+                'product_category.name as category_name',
+                'store.name as store_name'
+            ]);
 
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                if ($where['field'] == 'product.category_id') {
-                    $category = ProductCategory::where('id', $where['search'])->first();
-                    $model->whereBetween('product_category.lft', [$category->lft, $category->rgt]);
-                } else {
-                    $model->search($where);
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    if ($where['field'] == 'product.category_id') {
+                        $category = ProductCategory::where('id', $where['search'])->first();
+                        $model->whereBetween('product_category.lft', [$category->lft, $category->rgt]);
+                    } else {
+                        $model->search($where);
+                    }
                 }
             }
-        }
-
-        if (Input::ajax()) {
             return response()->json($model->paginate($search['limit']));
         }
 
@@ -415,11 +414,8 @@ class ProductController extends DefaultController
 
             $rows = $model->selectRaw("
             product.*,
-            product_category.name as category_name, 
-            product.name, 
-            product.name as text, 
-            product.spec,
-            product.unit,
+            product.name as text,
+            product_category.name as category_name,
             warehouse.name as warehouse_name,
             warehouse.id as warehouse_id
             ")->paginate($query['limit']);

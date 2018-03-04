@@ -1,13 +1,11 @@
 <div class="panel no-border">
 
-    @include('menus/requisition')
+    @include('tabs', ['tabKey' => 'stock.requisition'])
 
     <div class="wrapper-sm">
-
         <div class="btn-group">
         </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
-    
     </div>
         
     <div style="display:none;">

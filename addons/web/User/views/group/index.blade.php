@@ -1,18 +1,23 @@
 <div class="panel no-border">
 
-    @include('menus/user')
+    @include('tabs', ['tabKey' => 'user'])
 
     <div class="wrapper-sm">
-
         <div class="btn-group">
+            @if(isset($access['create']))
             <a class="btn btn-sm btn-default" href="javascript:actionLink('create');"><i class="fa fa-plus"></i> 新建</a>
+            @endif
+            @if(isset($access['edit']))
             <a class="btn btn-sm btn-default" href="javascript:actionLink('edit');"><i class="fa fa-edit"></i> 编辑</a>
+            @endif
+            @if(isset($access['delete']))
             <a class="btn btn-sm btn-default" href="javascript:actionLink('delete');"><i class="fa fa-remove"></i> 删除</a>
+            @endif
         </div>
-
+        @if(isset($access['export']))
         <a class="btn btn-sm btn-default" href="javascript:actionLink('export');"><i class="fa fa-share"></i> 导出</a>
+        @endif
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
-    
     </div>
         
     <div style="display:none;">

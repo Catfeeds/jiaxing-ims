@@ -1,6 +1,6 @@
 <div class="wrapper-sm">
 
-<form method="post" class="form-horizontal" action="{{url()}}" id="stock-warning-form" name="stock-warning-form">
+    <form method="post" class="form-horizontal" action="{{url()}}" id="stock-warning-form" name="stock-warning-form">
 
         <div class="form-group">
             <label for="stock_min" class="col-sm-2 control-label">最低库存</label>
@@ -18,9 +18,7 @@
 
         <input type="hidden" name="id" id="id" value="{{$row->id}}" />
 
-
-
-</form>
+    </form>
 
 </div>
     

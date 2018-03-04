@@ -66,15 +66,13 @@ class ServiceCategoryController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = ProductCategory::where('type', 2)->orderBy('sort', 'asc');
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
+            $model = ProductCategory::where('type', 2)->orderBy('sort', 'asc');
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
             $json = [];
             $model->get()->toNested()->each(function ($row) use (&$json) {
                 $row['text'] = $row['layer_html'].$row['name'];

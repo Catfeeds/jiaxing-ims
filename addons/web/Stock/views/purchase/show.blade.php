@@ -17,12 +17,12 @@
 @foreach($lines as $i => $line) 
 <tr>
     <td style="text-align:center;">{{$i + 1}}</td>
-    <td style="text-align:center;">{{$line->barcode}}</td>
+    <td style="text-align:center;">{{$line->product_barcode}}</td>
     <td style="text-align:center;">{{$line->product_name}}</td>
     <td style="text-align:center;">{{$line->product_spec}}</td>
     <td style="text-align:right;">{{$line->quantity}}</td>
-    <td style="text-align:right;">{{$line->price}}</td>
-    <td style="text-align:right;">{{$line->money}}</td>
+    <td style="text-align:right;">{{$line->cost_price}}</td>
+    <td style="text-align:right;">{{$line->cost_money}}</td>
     <td style="text-align:center;">{{$line->supplier_name}}</td>
     <td style="text-align:center;">{{$line->warehouse_name}}</td>
     <td style="text-align:center;">{{$line->date}}</td>
@@ -39,22 +39,22 @@
     <th>欠款金额</th>
 </tr>
 <tr>
-    <td style="text-align:right;">{{$row['rec_money']}}</td>
+    <td style="text-align:right;">{{$row['total_money']}}</td>
     <td style="text-align:right;">{{$row['discount_money']}}</td>
     <td style="text-align:right;">{{$row['pay_money']}}</td>
     <td style="text-align:right;">
-        @if($row['arear_money'] > 0)
-        <span class="text-danger">
+        @if($row['arrear_money'] > 0)
+            <span class="text-danger">
         @else
-        <span>
+            <span>
         @endif
-        {{$row['arear_money']}}
-        </span>
+            {{$row['arrear_money']}}
+            </span>
     </td>
 </tr>
 </table>
 
-@if((int)$row['arear_money'] && $trash == false)
+@if((int)$row['arrear_money'] > 0 && $trash == false && authorise('purchase-repayment.create'))
 <a class="btn btn-sm btn-info m-t-sm" href="javascript:repay();"> <i class="fa fa-reply"></i> 还款</a>
 @endif
 

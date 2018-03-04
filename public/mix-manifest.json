@@ -1,6 +1,6 @@
 {
-    "/assets/dist/app.min.js": "/assets/dist/app.min.js?id=54eeacadd4fc8047a3c0",
-    "/assets/dist/app.min.css": "/assets/dist/app.min.css?id=d3d5e0fdb5a50e8ae2f2",
-    "/assets/dist/index.min.js": "/assets/dist/index.min.js?id=02acf6a8608f836a6cc3",
-    "/assets/dist/index.min.css": "/assets/dist/index.min.css?id=06ae848158b8ea90dddb"
+    "/assets/dist/app.min.js": "/assets/dist/app.min.js",
+    "/assets/dist/app.min.css": "/assets/dist/app.min.css",
+    "/assets/dist/index.min.js": "/assets/dist/index.min.js",
+    "/assets/dist/index.min.css": "/assets/dist/index.min.css"
 }

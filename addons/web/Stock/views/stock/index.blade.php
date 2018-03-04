@@ -1,13 +1,14 @@
 <div class="panel no-border">
 
-    @include('menus/stock')
+    @include('tabs', ['tabKey' => 'stock'])
 
     <div class="wrapper-sm">
         <div class="btn-group">
+            @if(isset($access['export']))
             <a class="btn btn-sm btn-default" href="javascript:actionLink('export');"><i class="fa fa-share-square-o"></i> 导出</a>
+            @endif
         </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
-    
     </div>
         
     <div style="display:none;">
@@ -32,7 +33,7 @@
 <script>
 var routes = {
     index: 'stock/stock/index',
-    cost: 'stock/stock/cost',
+    costEdit: 'stock/stock/costEdit',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};
@@ -114,7 +115,7 @@ $.extend($.fn.fmatter, {
 function actionLink(action, id) {
 
     if(action == 'edit') {
-        formBox('修改成本', app.url(routes.cost, {id: id}), 'stock-cost-form', function(res) {
+        formBox('修改成本', app.url(routes.costEdit, {id: id}), 'stock-cost-form', function(res) {
             if(res.status) {
                 $.toastr('success', res.data, '提醒');
                 $table.trigger('reloadGrid');

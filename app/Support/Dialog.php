@@ -98,13 +98,13 @@ class Dialog
         return join("\n", $html);
     }
 
-    public function select2($item, $name, $value = '', $multi = 0, $readonly = 0, $width = 'auto')
+    public function select2($item, $name, $value = '', $multi = 0, $readonly = 0, $width = '153')
     {
-        $rows = '';
+        $rows = [];
 
         $dialog = self::$items[$item];
 
-        $value = 9;
+        $ids = [];
 
         if ($value) {
             $ids = explode(',', $value);
@@ -126,31 +126,29 @@ class Dialog
 
         $id = str_replace(['[',']'], ['_',''], $name);
 
-        if ($readonly == 0) {
-            //$html[] = '<div class="select-group input-group">';
-        } else {
-            //$html[] = '<div class="select-group">';
-        }
-
         $options = [];
         foreach ($rows as $k => $v) {
-            $options[] = '<option value="'.$k.'">'.$v.'</option>';
+            if (in_array($k, $ids)) {
+                $options[] = '<option '.$selected.' value="'.$k.'">'.$v.'</option>';
+            }
         }
 
-        if ($readonly == 0) {
-            $arrow  = $multi == 0 ? 'fa-caret-down' : 'fa-caret-down';
-            $option = "dialogUser('$dialog[title]','$dialog[url]','$id','$multi');";
-            $clear  = "selectClear('$id');";
+        $arrow  = $multi == 0 ? 'fa-caret-down' : 'fa-caret-down';
+        $option = "dialogUser('$dialog[title]','$dialog[url]','$id','$multi');";
+        $clear  = "selectClear('$id');";
+        $disabled = $readonly == 0 ? '' : 'disabled="disabled"';
 
-            $width  = is_numeric($width) ? 'width:'.$width.'px;' : '';
+        $html[] = '<select '.$disabled.' class="form-control input-sm" id="'.$id.'">'.join('', $options).'</select>';
 
-            $html[] = '<select class="form-control input-sm" style="'.$width.'" id="'.$id.'">'.join('', $options).'</select>';
-            //$html[] = '<div class="input-group-btn">';
-            //$html[] = '<button type="button" onclick="'.$option .'" class="btn btn-sm btn-default"><i class="fa '.$arrow.'"></i></button>';
-            //$html[] = '</div>';
-        } else {
-            $html[] = '<div class="form-control input-sm" id="'.$id.'_text">'.$rows.'</div><input type="hidden" id="'.$id.'" name="'.$name.'" value="'.$value.'">';
-        }
+        $select2['options'] = [
+            'width' => $width.'px',
+            'multiple' => $multi,
+            'ajax' => [
+                'url' => url($dialog['url']),
+            ],
+        ];
+        $html[] = '<script type="text/javascript">select2List.'.$name.'='.json_encode($select2).';</script>';
+
         return join("\n", $html);
     }
 

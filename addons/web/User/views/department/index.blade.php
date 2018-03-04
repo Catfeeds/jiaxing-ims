@@ -1,6 +1,6 @@
 <div class="panel no-border">
 
-    @include('menus/user')
+    @include('tabs', ['tabKey' => 'user'])
 
     <div class="wrapper">
 

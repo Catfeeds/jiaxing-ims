@@ -64,7 +64,7 @@
         <select class="form-control input-sm" id='unit' name='unit'>
             <option value=''> - </option>
             @foreach(option('goods.unit') as $unit)
-                <option value='{{$unit['id']}}' @if($row->unit == $unit['id']) selected @endif>{{$unit['name']}}</option>
+                <option value='{{$unit['id']}}' @if($row['unit'] == $unit['id']) selected @endif>{{$unit['name']}}</option>
             @endforeach
         </select>
     </div>

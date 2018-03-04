@@ -5,6 +5,7 @@ use Input;
 use Request;
 use Validator;
 
+use Aike\Web\Stock\StockWarehouse;
 use Aike\Web\Stock\Stock;
 use Aike\Web\Stock\Product;
 use Aike\Web\Stock\StockLine;
@@ -13,6 +14,12 @@ use Aike\Web\Index\Controllers\DefaultController;
 
 class StockController extends DefaultController
 {
+    // 首页
+    public function homeAction()
+    {
+        return $this->display();
+    }
+
     // 库存统计
     public function countAction()
     {
@@ -21,18 +28,18 @@ class StockController extends DefaultController
 
         $date = Input::get('date', 'day');
         if ($date == 'day') {
-            $values = [date('Y-m-d'),date('Y-m-d')];
+            $dates = [date('Y-m-d'),date('Y-m-d')];
         }
         if ($date == 'month') {
-            $values = [date('Y-m-01'),date('Y-m-d')];
+            $dates = [date('Y-m-01'),date('Y-m-d')];
         }
         if ($date == 'year') {
-            $values = [date('Y-01-01'),date('Y-m-d')];
+            $dates = [date('Y-01-01'),date('Y-m-d')];
         }
 
         $columns = [[
             'name'     => 'store_name',
-            'index'    => 'store.id',
+            'index'    => 'stock.store_id',
             'label'    => '门店',
             'search'   => [
                 'type' => 'select',
@@ -45,7 +52,7 @@ class StockController extends DefaultController
             'index'   => 'stock.date',
             'search'  => [
                 'type'  => 'date2',
-                'value' => $values,
+                'value' => $dates,
             ],
             'label'   => '日期',
             'width'   => 100,
@@ -61,44 +68,67 @@ class StockController extends DefaultController
         $search = search_form([
             'referer'  => 1,
             'advanced' => 1,
-            'date'     => 'day',
+            'date'     => $date,
         ], $search_columns);
 
-        if (Input::ajax()) {
-            $model = StockLine::orderBy('stock_line.id', 'desc')
-            ->leftJoin('stock', 'stock.id', '=', 'stock_line.stock_id')
-            ->leftJoin('product', 'product.id', '=', 'stock_line.product_id')
-            ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
-            ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_line.warehouse_id')
-            ->leftJoin('store', 'store.id', '=', 'stock.store_id')
-            ->where('stock.type_id', 1)
-            ->select([
-                'stock_line.*',
-                'store.name as store_name',
-                'stock.sn',
-                'stock.date',
-                'warehouse.name as warehouse_name',
-                'product.barcode as product_barcode',
-                'product.name as product_name',
-                'product.spec as product_spec',
-                'supplier.name as supplier_name'
-            ]);
-
-            foreach ($search['where'] as $where) {
-                if ($where['active']) {
+        // 获取日期范围入库和出库
+        $model = StockLine::leftJoin('stock', 'stock.id', '=', 'stock_line.stock_id')
+        ->leftJoin('stock_type', 'stock_type.id', '=', 'stock.type_id')
+        ->leftJoin('product', 'product.id', '=', 'stock.type_id')
+        ->whereBetween('stock.date', $dates)
+        ->where('stock.status', 1)
+        ->selectRaw('
+            stock.type_id,
+            stock_type.type,
+            sum(stock.total_quantity) as total_quantity,
+            sum(stock.pay_money) as total_money,
+            sum(stock_line.quantity * stock_line.price) as sales_money
+        ')
+        ->groupBy('stock.type_id');
+        foreach ($search['where'] as $where) {
+            if ($where['active']) {
+                if ($where['field'] == 'stock.store_id') {
                     $model->search($where);
                 }
             }
-            return response()->json($model->paginate($search['limit']));
         }
+        $count = $model->get();
+        $type_list = $count->keyBy('type_id');
+
+        // 计算当前库存金额和数量
+        $model = Stock::leftJoin('stock_type', 'stock_type.id', '=', 'stock.type_id')
+        ->where('stock.status', 1)
+        ->selectRaw('
+            stock.type_id,
+            stock_type.type,
+            sum(stock.total_quantity) as total_quantity,
+            sum(stock.pay_money) as total_money
+        ')
+        ->groupBy('stock_type.type');
+        foreach ($search['where'] as $where) {
+            if ($where['active']) {
+                if ($where['field'] == 'stock.store_id') {
+                    $model->search($where);
+                }
+            }
+        }
+        $rows = $model->get();
+
+        $total_quantity = $rows->where('type', 1)->sum('total_quantity') - $rows->where('type', 2)->sum('total_quantity');
+        $total_money = $rows->where('type', 1)->sum('total_money') - $rows->where('type', 2)->sum('total_money');
+
+        // 本月和上月销售额
 
         $types = DB::table('stock_type')->get();
 
         return $this->display([
-            'search'  => $search,
-            'columns' => $columns,
-            'other'   => $other,
-            'types'   => $types,
+            'search'         => $search,
+            'columns'        => $columns,
+            'count'          => $count,
+            'types'          => $types,
+            'type_list'      => $type_list,
+            'total_quantity' => $total_quantity,
+            'total_money'    => $total_money,
         ]);
     }
 
@@ -106,24 +136,24 @@ class StockController extends DefaultController
     public function indexAction()
     {
         $warehouses = DB::table('warehouse')->get(['id', 'name as text']);
-        $stores     = DB::table('store')->get(['id', 'name as text']);
+        $stores = DB::table('store')->get(['id', 'name as text']);
 
         $columns = [[
-            'name'     => 'name',
+            'name'     => 'product_name',
             'index'    => 'product.name',
             'search'   => 'text',
             'label'    => '商品',
             'width' => 160,
             'align'    => 'center',
         ],[
-            'name'    => 'spec',
+            'name'    => 'product_spec',
             'index'   => 'product.spec',
             'search'   => 'text',
             'label'   => '规格',
             'width'   => 120,
             'align'   => 'center',
         ],[
-            'name'    => 'barcode',
+            'name'    => 'product_barcode',
             'index'   => 'product.barcode',
             'search'   => 'text',
             'label'   => '条码',
@@ -142,7 +172,7 @@ class StockController extends DefaultController
         ],[
             'name'    => 'warehouse_name',
             'index'   => 'warehouse.id',
-            'label'   => '默认仓库',
+            'label'   => '仓库',
             'search'   => [
                 'type' => 'select',
                 'data' => $warehouses,
@@ -162,30 +192,36 @@ class StockController extends DefaultController
         ],[
             'name'    => 'stock_quantity',
             'index'   => 'product.stock_quantity',
-            'label'   => '当前库存',
+            'label'   => '库存',
             'width'   => 80,
             'align'   => 'right',
         ],[
-            'name'    => 'cost',
-            'index'   => 'product.cost',
-            'label'   => '成本价格',
+            'name'    => 'virtual_quantity',
+            'index'   => 'stock_warehouse.virtual_quantity',
+            'label'   => '虚拟库存',
             'width'   => 80,
             'align'   => 'right',
         ],[
-            'name'    => 'price',
+            'name'    => 'stock_cost',
+            'index'   => 'stock_warehouse.stock_cost',
+            'label'   => '成本',
+            'width'   => 80,
+            'align'   => 'right',
+        ],[
+            'name'    => 'product_price',
             'index'   => 'product.price',
-            'label'   => '销售价格',
+            'label'   => '售价',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'stock_min',
-            'index'   => 'product.stock_min',
+            'index'   => 'stock_warehouse.stock_min',
             'label'   => '最小库存',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'stock_max',
-            'index'   => 'product.stock_max',
+            'index'   => 'stock_warehouse.stock_max',
             'label'   => '最大库存',
             'width'   => 80,
             'align'   => 'right',
@@ -206,26 +242,31 @@ class StockController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = Product::orderBy('product.id', 'desc')
-        ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
-        ->leftJoin('warehouse', 'warehouse.id', '=', 'product.warehouse_id')
-        ->leftJoin('store', 'store.id', '=', 'product.store_id')
-        ->select([
-            'product.*',
-            'store.name as store_name',
-            'warehouse.name as warehouse_name',
-            'product_category.name as category_name',
-        ])
-        ->where('product.status', 1)
-        ->where('product.type', 1);
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
+            $model = StockWarehouse::leftJoin('product', 'product.id', '=', 'stock_warehouse.product_id')
+            ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
+            ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_warehouse.warehouse_id')
+            ->leftJoin('store', 'store.id', '=', 'stock_warehouse.store_id')
+            ->select([
+                'stock_warehouse.*',
+                'product.name as product_name',
+                'product.spec as product_spec',
+                'product.price as product_price',
+                'product.barcode as product_barcode',
+                'store.name as store_name',
+                'warehouse.name as warehouse_name',
+                'product_category.name as category_name',
+            ])
+            ->where('product.status', 1)
+            ->where('product.type', 1)
+            ->orderBy('warehouse.sort', 'asc')
+            ->orderBy('product_category.sort', 'asc');
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
             return response()->json($model->paginate($search['limit']));
         }
 
@@ -242,21 +283,21 @@ class StockController extends DefaultController
         $stores     = DB::table('store')->get(['id', 'name as text']);
 
         $columns = [[
-            'name'     => 'name',
+            'name'     => 'product_name',
             'index'    => 'product.name',
             'search'   => 'text',
             'label'    => '商品',
             'width' => 160,
             'align'    => 'center',
         ],[
-            'name'    => 'spec',
+            'name'    => 'product_spec',
             'index'   => 'product.spec',
             'search'   => 'text',
             'label'   => '规格',
             'width'   => 120,
             'align'   => 'center',
         ],[
-            'name'    => 'barcode',
+            'name'    => 'product_barcode',
             'index'   => 'product.barcode',
             'search'   => 'text',
             'label'   => '条码',
@@ -275,7 +316,7 @@ class StockController extends DefaultController
         ],[
             'name'    => 'warehouse_name',
             'index'   => 'warehouse.id',
-            'label'   => '默认仓库',
+            'label'   => '仓库',
             'search'   => [
                 'type' => 'select',
                 'data' => $warehouses,
@@ -300,14 +341,20 @@ class StockController extends DefaultController
             'align'   => 'right',
         ],[
             'name'    => 'stock_min',
-            'index'   => 'product.stock_min',
+            'index'   => 'stock_warehouse.stock_min',
             'label'   => '最小库存',
             'width'   => 80,
             'align'   => 'right',
         ],[
             'name'    => 'stock_max',
-            'index'   => 'product.stock_max',
+            'index'   => 'stock_warehouse.stock_max',
             'label'   => '最大库存',
+            'width'   => 80,
+            'align'   => 'right',
+        ],[
+            'name'    => 'stock_limit',
+            'index'   => 'stock_warehouse.stock_limit',
+            'label'   => '超限数量',
             'width'   => 80,
             'align'   => 'right',
         ],[
@@ -327,27 +374,43 @@ class StockController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = Product::orderBy('product.id', 'desc')
-        ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
-        ->leftJoin('warehouse', 'warehouse.id', '=', 'product.warehouse_id')
-        ->leftJoin('store', 'store.id', '=', 'product.store_id')
-        ->select([
-            'product.*',
-            'store.name as store_name',
-            'warehouse.name as warehouse_name',
-            'product_category.name as category_name',
-        ])
-        ->where('product.status', 1)
-        ->where('product.type', 1);
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
-            return response()->json($model->paginate($search['limit']));
+            $model = StockWarehouse::leftJoin('product', 'product.id', '=', 'stock_warehouse.product_id')
+            ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
+            ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_warehouse.warehouse_id')
+            ->leftJoin('store', 'store.id', '=', 'stock_warehouse.store_id')
+            ->selectRaw('
+                stock_warehouse.*,
+                product.name as product_name,
+                product.spec as product_spec,
+                product.price as product_price,
+                product.barcode as product_barcode,
+                store.name as store_name,
+                warehouse.name as warehouse_name,
+                product_category.name as category_name
+            ')
+            ->where('product.status', 1)
+            ->where('product.type', 1)
+            ->orderBy('warehouse.sort', 'asc')
+            ->orderBy('product_category.sort', 'asc');
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
+            $rows = $model->paginate($search['limit']);
+            $rows->transform(function ($row) {
+                $quantity = $row['stock_quantity'];
+                if ($quantity > 0) {
+                    $quantity = $quantity - $row['stock_max'];
+                } else {
+                    $quantity = $quantity - $row['stock_min'];
+                }
+                $row['stock_limit'] = $quantity;
+                return $row;
+            });
+            return response()->json($rows);
         }
 
         return $this->display(array(
@@ -422,23 +485,47 @@ class StockController extends DefaultController
             'width'   => 160,
             'align'   => 'center',
         ],[
-            'name'    => 'line_quantity',
-            'index'   => 'stock_line.quantity',
-            'label'   => '数量',
-            'width'   => 120,
-            'align'   => 'right',
+            'name'      => 'cost_quantity1',
+            'index'     => 'stock_line.cost_quantity1',
+            'formatter' => 'integer',
+            'label'     => '入库数量',
+            'width'     => 120,
+            'align'     => 'right',
         ],[
-            'name'    => 'line_price',
-            'index'   => 'stock_line.price',
-            'label'   => '单价',
-            'width'   => 120,
-            'align'   => 'right',
+            'name'      => 'cost_price1',
+            'index'     => 'stock_line.cost_price1',
+            'formatter' => 'number',
+            'label'     => '入库成本',
+            'width'     => 120,
+            'align'     => 'right',
         ],[
-            'name'    => 'line_money',
-            'index'   => 'stock_line.line_money',
-            'label'   => '金额',
-            'width'   => 120,
-            'align'   => 'right',
+            'name'      => 'cost_money1',
+            'index'     => 'stock_line.cost_money1',
+            'formatter' => 'number',
+            'label'     => '入库金额',
+            'width'     => 120,
+            'align'     => 'right',
+        ],[
+            'name'      => 'cost_quantity2',
+            'index'     => 'stock_line.quantity',
+            'formatter' => 'integer',
+            'label'     => '出库数量',
+            'width'     => 120,
+            'align'     => 'right',
+        ],[
+            'name'      => 'cost_price2',
+            'index'     => 'stock_line.cost_price2',
+            'formatter' => 'number',
+            'label'     => '出库成本',
+            'width'     => 120,
+            'align'     => 'right',
+        ],[
+            'name'      => 'cost_money2',
+            'index'     => 'stock_line.cost_money2',
+            'formatter' => 'number',
+            'label'     => '出库金额',
+            'width'     => 120,
+            'align'     => 'right',
         ]];
 
         $search_columns = search_columns($columns);
@@ -447,34 +534,48 @@ class StockController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = StockLine::orderBy('product.id', 'desc')
-        ->leftJoin('product', 'product.id', '=', 'stock_line.product_id')
-        ->leftJoin('stock', 'stock.id', '=', 'stock_line.stock_id')
-        ->leftJoin('stock_type', 'stock_type.id', '=', 'stock.type_id')
-        ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_line.warehouse_id')
-        ->leftJoin('store', 'store.id', '=', 'stock.store_id')
-        ->select([
-            'product.*',
-            'stock_line.quantity as line_quantity',
-            'stock_line.price as line_price',
-            'stock_line.money as line_money',
-            'store.name as store_name',
-            'warehouse.name as warehouse_name',
-            'stock.date',
-            'stock.sn',
-            'stock_type.name as type_name'
-        ])
-        ->where('product.status', 1)
-        ->where('product.type', 1);
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
-            return response()->json($model->paginate($search['limit']));
+            $model = StockLine::leftJoin('product', 'product.id', '=', 'stock_line.product_id')
+            ->leftJoin('stock', 'stock.id', '=', 'stock_line.stock_id')
+            ->leftJoin('stock_type', 'stock_type.id', '=', 'stock.type_id')
+            ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_line.warehouse_id')
+            ->leftJoin('store', 'store.id', '=', 'stock.store_id')
+            ->select([
+                'product.*',
+                'stock_line.quantity as cost_quantity',
+                'stock_line.cost_price',
+                'stock_line.cost_money',
+                'store.name as store_name',
+                'warehouse.name as warehouse_name',
+                'stock.date',
+                'stock.sn',
+                'stock_type.name as type_name',
+                'stock_type.type as stock_type',
+                'stock_line.id',
+            ])
+            ->where('stock.status', 1)
+            ->where('product.status', 1)
+            ->where('product.type', 1)
+            ->orderBy('stock_line.id', 'desc');
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
+
+            $rows = $model->paginate($search['limit']);
+            $rows->transform(function ($row) {
+                $type     = $row['stock_type'];
+                $quantity = $row['cost_quantity'];
+                $price    = $row['cost_price'];
+                $money    = $row['cost_money'];
+                $row['cost_quantity'.$type] = $quantity;
+                $row['cost_price'.$type] = $quantity;
+                $row['cost_money'.$type] = $quantity;
+                return $row;
+            });
+            return response()->json($rows);
         }
 
         return $this->display(array(
@@ -487,7 +588,7 @@ class StockController extends DefaultController
     public function warningEditAction()
     {
         $gets = Input::get();
-        $row = Product::where('id', $gets['id'])->first();
+        $row = StockWarehouse::where('id', $gets['id'])->first();
 
         if (Request::method() == 'POST') {
             if ($row->id) {
@@ -505,18 +606,18 @@ class StockController extends DefaultController
     }
 
     // 修改成本
-    public function costAction()
+    public function costEditAction()
     {
         $gets = Input::get();
-        $row = Product::where('id', $gets['id'])->first();
+        $row = StockWarehouse::where('id', $gets['id'])->first();
 
         if (Request::method() == 'POST') {
             if ($row->id) {
-                $row->cost = $gets['cost'];
+                $row->stock_cost = $gets['stock_cost'];
                 $row->save();
-                return $this->json('恭喜你，商品成本修改成功。', true);
+                return $this->json('恭喜你，成本修改成功。', true);
             } else {
-                return $this->json('很抱歉，商品不存在。');
+                return $this->json('很抱歉，仓库不存在。');
             }
         }
 

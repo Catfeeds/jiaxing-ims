@@ -132,10 +132,10 @@ return [
             ]
         ],
         "purchase" => [
-            "name" => "采购",
+            "name" => "采购入库",
             "actions" => [
-                "guide" => [
-                    "name" => "引导"
+                "home" => [
+                    "name" => "首页"
                 ],
                 "index" => [
                     "name" => "列表"
@@ -149,11 +149,104 @@ return [
                 "create" => [
                     "name" => "新建"
                 ],
-                "trash" => [
-                    "name" => "回收"
+                "invalid" => [
+                    "name" => "作废"
+                ],
+                "invalidEdit" => [
+                    "name" => "作废表单"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "purchase-return" => [
+            "name" => "采购退货",
+            "actions" => [
+                "home" => [
+                    "name" => "首页"
+                ],
+                "index" => [
+                    "name" => "列表"
+                ],
+                "show" => [
+                    "name" => "显示"
+                ],
+                "line" => [
+                    "name" => "明细"
+                ],
+                "create" => [
+                    "name" => "新建"
                 ],
                 "invalid" => [
                     "name" => "作废"
+                ],
+                "invalidEdit" => [
+                    "name" => "作废表单"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "transfer" => [
+            "name" => "库存调拨",
+            "actions" => [
+                "home" => [
+                    "name" => "首页"
+                ],
+                "index" => [
+                    "name" => "列表"
+                ],
+                "auditInput" => [
+                    "name" => "调入审核"
+                ],
+                "auditOutput" => [
+                    "name" => "调出审核"
+                ],
+                "show" => [
+                    "name" => "显示"
+                ],
+                "line" => [
+                    "name" => "明细"
+                ],
+                "create" => [
+                    "name" => "新建"
+                ],
+                "invalid" => [
+                    "name" => "作废"
+                ],
+                "invalidEdit" => [
+                    "name" => "作废表单"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "check" => [
+            "name" => "库存盘点",
+            "actions" => [
+                "home" => [
+                    "name" => "首页"
+                ],
+                "index" => [
+                    "name" => "列表"
+                ],
+                "show" => [
+                    "name" => "显示"
+                ],
+                "line" => [
+                    "name" => "明细"
+                ],
+                "create" => [
+                    "name" => "新建"
+                ],
+                "invalid" => [
+                    "name" => "作废"
+                ],
+                "invalidEdit" => [
+                    "name" => "作废表单"
                 ],
                 "delete" => [
                     "name" => "删除"
@@ -175,10 +268,10 @@ return [
             ]
         ],
         "requisition" => [
-            "name" => "领料",
+            "name" => "领料出库",
             "actions" => [
-                "guide" => [
-                    "name" => "引导"
+                "home" => [
+                    "name" => "首页"
                 ],
                 "index" => [
                     "name" => "列表"
@@ -192,11 +285,40 @@ return [
                 "create" => [
                     "name" => "新建"
                 ],
-                "trash" => [
-                    "name" => "回收"
+                "invalid" => [
+                    "name" => "作废"
+                ],
+                "invalidEdit" => [
+                    "name" => "作废表单"
+                ],
+                "delete" => [
+                    "name" => "删除"
+                ]
+            ]
+        ],
+        "loss" => [
+            "name" => "报损出库",
+            "actions" => [
+                "home" => [
+                    "name" => "首页"
+                ],
+                "index" => [
+                    "name" => "列表"
+                ],
+                "show" => [
+                    "name" => "显示"
+                ],
+                "line" => [
+                    "name" => "明细"
+                ],
+                "create" => [
+                    "name" => "新建"
                 ],
                 "invalid" => [
                     "name" => "作废"
+                ],
+                "invalidEdit" => [
+                    "name" => "作废表单"
                 ],
                 "delete" => [
                     "name" => "删除"
@@ -204,24 +326,27 @@ return [
             ]
         ],
         "stock" => [
-            "name" => "库存",
+            "name" => "库存统计",
             "actions" => [
-                "count" => [
-                    "name" => "库存统计"
+                "home" => [
+                    "name" => "基础设置"
                 ],
                 "index" => [
                     "name" => "库存列表"
                 ],
-                "warning" => [
-                    "name" => "库存预警"
+                "count" => [
+                    "name" => "库存统计"
                 ],
                 "line" => [
                     "name" => "收发明细"
                 ],
+                "warning" => [
+                    "name" => "库存预警"
+                ],
                 "warningEdit" => [
                     "name" => "设置预警"
                 ],
-                "cost" => [
+                "costEdit" => [
                     "name" => "修改成本"
                 ],
             ]

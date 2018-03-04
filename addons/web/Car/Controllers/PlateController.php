@@ -52,15 +52,14 @@ class PlateController extends DefaultController
 
         $query = $search['query'];
 
-        $model = Plate::query();
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
+            $model = Plate::query();
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
             return response()->json($model->paginate($search['limit']));
         }
 

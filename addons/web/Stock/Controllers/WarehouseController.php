@@ -65,15 +65,14 @@ class WarehouseController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = Warehouse::orderBy('sort', 'asc');
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
+            $model = Warehouse::orderBy('sort', 'asc');
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
             return response()->json($model->get());
         }
 

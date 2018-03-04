@@ -1,11 +1,10 @@
 <div class="panel no-border">
 
-    @include('menus/requisition')
+    @include('tabs', ['tabKey' => 'stock.loss'])
 
     <div class="wrapper-sm">
-
         <div class="btn-group">
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('delete');"><i class="fa fa-remove"></i> 删除</a>
+            <a class="btn btn-sm btn-default" href="javascript:actionLink('print');"><i class="fa fa-print"></i> 打印</a>
         </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
     
@@ -32,24 +31,16 @@
 
 <script>
 var routes = {
-    index: 'stock/requisition/trash',
-    delete: 'stock/requisition/delete',
-    show: 'stock/requisition/show',
+    index: 'stock/loss/index',
+    invalidEdit: 'stock/loss/invalidEdit',
+    show: 'stock/loss/show',
+    export: 'stock/loss/export',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};
 var search = null;
 var searchSimple = null;
-
-$.extend($.fn.fmatter, {
-    arear_money: function(value, options, rowdata) {
-        if(value > 0) {
-            return '<span style="color:#f00;">'+value +'</span>';
-        } else {
-            return value;
-        }
-    }
-});
+var showDialog = null;
 
 (function($) {
     
@@ -115,34 +106,23 @@ $.extend($.fn.fmatter, {
 function actionLink(action, id) {
 
     if(action == 'show') {
-        showDialog = viewBox('show','采购明细', app.url(routes.show, {id: id, trash: true}), 'lg');
+        showDialog = viewBox('show','采购明细', app.url(routes.show, {id: id}), 'lg');
         return;
     }
 
-    if(action == 'delete') {
-        var selections = $table.jqGrid('getSelections');
-        var query = [];
-        $.each(selections, function(i, selection) {
-            query.push(selection.id);
+    if(action == 'invalidEdit') {
+        formBox('作废单据', app.url(routes.invalidEdit, {id: id}), 'loss-invalid-form', function(res) {
+            if(res.status) {
+                $.toastr('success', res.data, '提醒');
+                $table.jqGrid('setGridParam', {
+                    postData: params,
+                    page: 1
+                }).trigger('reloadGrid');
+                $(this).dialog("close");
+            } else {
+                $.toastr('error', res.data, '提醒');
+            }
         });
-        if(query.length) {
-            $.messager.confirm('操作确认', '确定要删除吗？', function() {
-                $.post(app.url(routes.delete), {id: query}, function(res) {
-                    if(res.status) {
-                        $.toastr('success', res.data, '提醒');
-                        $table.jqGrid('setGridParam', {
-                            postData: params,
-                            page: 1
-                        }).trigger('reloadGrid');
-                    } else {
-                        $.toastr('error', res.data, '提醒');
-                    }
-                });
-            });
-
-        } else {
-            $.toastr('error', '最少选择一行记录。', '错误');
-        }
         return;
     }
 

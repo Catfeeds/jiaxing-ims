@@ -19,7 +19,7 @@
 
 <div class="panel no-border">
 
-    @include('menus/requisition')
+    @include('tabs', ['tabKey' => 'stock.transfer'])
 
     <form id="search-form-simple" class="search-form form-inline" action="{{url()}}" method="get">
         @include('searchForm3')
@@ -34,7 +34,7 @@
                 <i class="fa fa-3x fa-sun-o"></i>
             </div>
             <div class="todo-text">
-                <div class="text-md" style="color:#2c83e4;">本日领料金额</div>
+                <div class="text-md" style="color:#2c83e4;">本日调入金额</div>
                 <div class="px text-base">{{$day}}元</div>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 <i class="fa fa-3x fa-calendar"></i>
             </div>
             <div class="todo-text">
-                <div class="text-md" style="color:#fd875a;">本月领料金额</div>
+                <div class="text-md" style="color:#fd875a;">本月调入金额</div>
                 <div class="px text-base">{{$month}}元</div>
             </div>
         </div>
@@ -56,7 +56,40 @@
                 <i class="fa fa-3x fa-database"></i>
             </div>
             <div class="todo-text">
-                <div class="text-md" style="color:#27c24c;">累计领料金额</div>
+                <div class="text-md" style="color:#27c24c;">累计调入金额</div>
+                <div class="px text-base">{{$all}}元</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+        <div class="panel">
+            <div class="todo-logo hidden-xs" style="background-color:#2c83e4;">
+                <i class="fa fa-3x fa-sun-o"></i>
+            </div>
+            <div class="todo-text">
+                <div class="text-md" style="color:#2c83e4;">本日调出金额</div>
+                <div class="px text-base">{{$day}}元</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+        <div class="panel">
+            <div class="todo-logo hidden-xs" style="background-color:#fd875a;">
+                <i class="fa fa-3x fa-calendar"></i>
+            </div>
+            <div class="todo-text">
+                <div class="text-md" style="color:#fd875a;">本月调出金额</div>
+                <div class="px text-base">{{$month}}元</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
+        <div class="panel">
+            <div class="todo-logo hidden-xs" style="background-color:#27c24c;">
+                <i class="fa fa-3x fa-database"></i>
+            </div>
+            <div class="todo-text">
+                <div class="text-md" style="color:#27c24c;">累计调出金额</div>
                 <div class="px text-base">{{$all}}元</div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 <div class="panel no-border">
 
-@include('menus/setting')
+@include('tabs', ['tabKey' => 'setting'])
 
 <div class="wrapper-sm">
 

@@ -1,6 +1,6 @@
 <div class="panel no-border">
 
-@include('menu')
+    @include('tabs', ['tabKey' => 'setting'])
 
     <form method="post" class="form-horizontal" action="{{url()}}" id="myform" name="myform">
         

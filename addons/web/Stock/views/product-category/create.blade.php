@@ -5,7 +5,7 @@
 <div class="form-group">
     <label for="parent_id" class="col-sm-2 control-label">上级类别</label>
     <div class="col-sm-10">
-        <select class="form-control input-inline input-sm" name="parent_id" id="parent_id">
+        <select class="form-control input-sm" name="parent_id" id="parent_id">
             <option value=""> - </option>
             @if(count($categorys)) 
             @foreach($categorys as $k => $v)

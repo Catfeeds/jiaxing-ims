@@ -1,11 +1,12 @@
 <div class="panel no-border">
 
-    @include('menus/purchase')
+    @include('tabs', ['tabKey' => 'stock.purchase'])
 
     <div class="wrapper-sm">
         <div class="btn-group">
+            @if(isset($access['print']))
             <a class="btn btn-sm btn-default" href="javascript:actionLink('print');"><i class="fa fa-print"></i> 打印</a>
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('invalid');"><i class="fa fa-trash"></i> 作废</a>
+            @endif
         </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
     
@@ -33,7 +34,7 @@
 <script>
 var routes = {
     index: 'stock/purchase/index',
-    invalid: 'stock/purchase/invalid',
+    invalidEdit: 'stock/purchase/invalidEdit',
     show: 'stock/purchase/show',
     export: 'stock/purchase/export',
 };
@@ -44,9 +45,9 @@ var searchSimple = null;
 var showDialog = null;
 
 $.extend($.fn.fmatter, {
-    arear_money: function(value, options, rowdata) {
+    arrear_money: function(value, options, rowdata) {
         if(value > 0) {
-            return '<span style="color:#f00;">'+value +'</span>';
+            return '<span class="text-danger">'+ value +'</span>';
         } else {
             return value;
         }
@@ -121,15 +122,8 @@ function actionLink(action, id) {
         return;
     }
 
-    if(action == 'invalid') {
-
-        var selections = $table.jqGrid('getSelections');
-        if (selections.length == 0) {
-            $.toastr('error', '最少选择一行记录。', '提醒');
-            return;
-        }
-
-        formBox('作废单据', app.url(routes.invalid, {id: selections[0].id}), 'purchase-invalid-form', function(res) {
+    if(action == 'invalidEdit') {
+        formBox('作废单据', app.url(routes.invalidEdit, {id: id}), 'purchase-invalid-form', function(res) {
             if(res.status) {
                 $.toastr('success', res.data, '提醒');
                 $table.jqGrid('setGridParam', {

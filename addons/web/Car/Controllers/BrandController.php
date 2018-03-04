@@ -38,15 +38,14 @@ class BrandController extends DefaultController
 
         $query = $search['query'];
 
-        $model = Brand::query();
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                $model->search($where);
-            }
-        }
-
         if (Input::ajax()) {
+            $model = Brand::query();
+
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    $model->search($where);
+                }
+            }
             return response()->json($model->paginate($search['limit']));
         }
 

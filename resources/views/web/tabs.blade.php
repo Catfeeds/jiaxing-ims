@@ -1,18 +1,14 @@
-<?php
-    $_params = $search['params'];
-    unset($_params['referer']);
-    if($_params['advanced'] == 0) {
-        unset($_params['advanced']);
-    }
-?>
-
 <div class="panel-heading tabs-box">
     <ul class="nav nav-tabs">
-        @foreach($tabs['items'] as $tab)
-        <li class="@if($search['query'][$tabs['name']] == (string)$tab['id']) active @endif">
-            <?php $_params[$tabs['name']] = $tab['id']; ?>
-            <a class="text-sm" href="{{url('', $_params)}}">{{$tab['name']}}</a>
+        <?php
+        $tabs = Aike\Web\Index\Menu::getTabs($tabKey);
+        ?>
+        @foreach($tabs as $tab)
+        @if($tab['selected'] == 1)
+        <li class="@if(Request::path() == $tab['url']) active @endif">
+            <a class="text-sm" href="{{url($tab['url'])}}">{{$tab['name']}}</a>
         </li>
+        @endif
         @endforeach
     </ul>
 </div>

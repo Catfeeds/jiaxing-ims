@@ -1,14 +1,14 @@
 <div class="panel no-border">
 
-    @include('menus/requisition')
+    @include('tabs', ['tabKey' => 'stock.requisition'])
 
     <div class="wrapper-sm">
         <div class="btn-group">
+            @if(isset($access['print']))
             <a class="btn btn-sm btn-default" href="javascript:actionLink('print');"><i class="fa fa-print"></i> 打印</a>
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('invalid');"><i class="fa fa-trash"></i> 作废</a>
+            @endif
         </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
-    
     </div>
         
     <div style="display:none;">
@@ -33,7 +33,7 @@
 <script>
 var routes = {
     index: 'stock/requisition/index',
-    invalid: 'stock/requisition/invalid',
+    invalidEdit: 'stock/requisition/invalidEdit',
     show: 'stock/requisition/show',
     export: 'stock/requisition/export',
 };
@@ -42,16 +42,6 @@ var params = paramsSimple = {{json_encode($search['query'])}};
 var search = null;
 var searchSimple = null;
 var showDialog = null;
-
-$.extend($.fn.fmatter, {
-    arear_money: function(value, options, rowdata) {
-        if(value > 0) {
-            return '<span style="color:#f00;">'+value +'</span>';
-        } else {
-            return value;
-        }
-    }
-});
 
 (function($) {
     
@@ -121,15 +111,8 @@ function actionLink(action, id) {
         return;
     }
 
-    if(action == 'invalid') {
-
-        var selections = $table.jqGrid('getSelections');
-        if (selections.length == 0) {
-            $.toastr('error', '最少选择一行记录。', '提醒');
-            return;
-        }
-
-        formBox('作废单据', app.url(routes.invalid, {id: selections[0].id}), 'requisition-invalid-form', function(res) {
+    if(action == 'invalidEdit') {
+        formBox('作废单据', app.url(routes.invalidEdit, {id: id}), 'requisition-invalid-form', function(res) {
             if(res.status) {
                 $.toastr('success', res.data, '提醒');
                 $table.jqGrid('setGridParam', {

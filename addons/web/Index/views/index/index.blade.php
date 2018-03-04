@@ -253,7 +253,7 @@ $(function() {
 								<li class="has-children">
 									<a href="javascript:;" data-toggle="addtab" data-url="{{url($group['url'])}}" data-id="{{$group['id']}}" data-name="{{$group['name']}}">
 
-                                        @if(count($group['children']))
+                                        @if($group['children'])
                                         <span class="pull-right">
                                             <i class="fa fa-fw fa-angle-right text"></i>
                                             <i class="fa fa-fw fa-angle-down text-active"></i>
@@ -264,7 +264,7 @@ $(function() {
 
                                     </a>
 
-                                    @if(count($group['children']))
+                                    @if($group['children'])
                                     <ul>
                                     @foreach($group['children'] as $action)
                                     @if($action['selected'])

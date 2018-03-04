@@ -1,4 +1,4 @@
-<div class="wrapper-xs">
+<div class="wrapper-xs search-form-advanced">
 
 <div class="row">
 
@@ -7,9 +7,8 @@
         <?php if($column[0] == 'text2') { continue; } ?>
     
         <div class="wrapper-xs">
-            <div class="col-sm-2">
             <div class="form-group">
-                <label class="control-label">{{$column[2]}}</label>
+                <label class="control-label col-sm-2">{{$column[2]}}</label>
                 <?php
                 if (is_array($column[0])) {
                     $__type  = $column[0]['type'];
@@ -18,7 +17,6 @@
                 }
                 ?>
                 <input type="hidden" name="field_{{$i}}" id="search-field-{{$i}}" data-type="{{$__type}}" value="{{$column[1]}}">
-            </div>
             </div>
             <div class="col-sm-2">
             <div class="form-group" style="display:none;">

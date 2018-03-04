@@ -10,7 +10,7 @@
                     <select class="form-control input-sm" id='parent_id' name='parent_id'>
                         <option value=''> - </option>
                         @foreach($roles as $role)
-                            <option value="{{$role['id']}}" @if($row->parent_id == $role['id']) selected @endif>{{$role['layer_space']}}{{$role['title']}}</option>
+                            <option value="{{$role['id']}}" @if($row->parent_id == $role['id']) selected @endif>{{$role['layer_space']}}{{$role['name']}}</option>
                         @endforeach
                     </select>
                 </td>

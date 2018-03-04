@@ -1,11 +1,10 @@
 <div class="panel no-border">
 
-    @include('menus/purchase')
+    @include('tabs', ['tabKey' => 'stock.transfer'])
 
     <div class="wrapper-sm">
 
         <div class="btn-group">
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('delete');"><i class="fa fa-remove"></i> 删除</a>
         </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
     
@@ -32,24 +31,12 @@
 
 <script>
 var routes = {
-    index: 'stock/purchase/trash',
-    delete: 'stock/purchase/delete',
-    show: 'stock/purchase/show',
+    index: 'stock/purchase-return/line',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};
 var search = null;
 var searchSimple = null;
-
-$.extend($.fn.fmatter, {
-    arear_money: function(value, options, rowdata) {
-        if(value > 0) {
-            return '<span style="color:#f00;">'+value +'</span>';
-        } else {
-            return value;
-        }
-    }
-});
 
 (function($) {
     
@@ -93,7 +80,7 @@ $.extend($.fn.fmatter, {
         colModel: model,
         rowNum: 25,
         autowidth: true,
-        multiselect: true,
+        multiselect: false,
         viewrecords: true,
         rownumbers: false,
         width: '100%',
@@ -102,8 +89,6 @@ $.extend($.fn.fmatter, {
         postData: params,
         pager: '#jqgrid-page',
         ondblClickRow: function(rowid) {
-            var row = $(this).getRowData(rowid);
-            actionLink('show', row.id);
         },
         gridComplete: function() {
             $(this).jqGrid('setColsWidth');
@@ -113,38 +98,6 @@ $.extend($.fn.fmatter, {
 })(jQuery);
 
 function actionLink(action, id) {
-
-    if(action == 'show') {
-        showDialog = viewBox('show','采购明细', app.url(routes.show, {id: id, trash: true}), 'lg');
-        return;
-    }
-
-    if(action == 'delete') {
-        var selections = $table.jqGrid('getSelections');
-        var query = [];
-        $.each(selections, function(i, selection) {
-            query.push(selection.id);
-        });
-        if(query.length) {
-            $.messager.confirm('操作确认', '确定要删除吗？', function() {
-                $.post(app.url(routes.delete), {id: query}, function(res) {
-                    if(res.status) {
-                        $.toastr('success', res.data, '提醒');
-                        $table.jqGrid('setGridParam', {
-                            postData: params,
-                            page: 1
-                        }).trigger('reloadGrid');
-                    } else {
-                        $.toastr('error', res.data, '提醒');
-                    }
-                });
-            });
-
-        } else {
-            $.toastr('error', '最少选择一行记录。', '错误');
-        }
-        return;
-    }
 
     if(action == 'filter') {
         // 过滤数据

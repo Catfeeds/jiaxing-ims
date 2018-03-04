@@ -1,8 +1,8 @@
 <div class="panel no-border">
 
-    @include('menus/user')
+    @include('tabs', ['tabKey' => 'user'])
 
-    @include('tabs')
+    @include('tabs2')
 
     <div class="wrapper">
         @include('user/query')

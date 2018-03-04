@@ -27,8 +27,8 @@ class PurchaseRepaymentController extends DefaultController
             'width' => 160,
             'align'    => 'center',
         ],[
-            'name'    => 'arear_money',
-            'index'   => 'stock_repayment.arear_money',
+            'name'    => 'arrear_money',
+            'index'   => 'stock_repayment.arrear_money',
             'label'   => '欠款金额',
             'width'   => 80,
             'align'   => 'right',
@@ -108,35 +108,24 @@ class PurchaseRepaymentController extends DefaultController
             'advanced' => 1,
         ], $search_columns);
 
-        $model = Repayment::orderBy('stock.id', 'desc')
-        ->leftJoin('stock', 'stock_repayment.stock_id', '=', 'stock.id')
-        ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
-        ->leftJoin('store', 'store.id', '=', 'stock.store_id')
-        ->select([
-            'stock_repayment.*',
-            'store.name as store_name',
-            'supplier.name as supplier_name',
-            'supplier.personal_mobile as supplier_personal_mobile',
-            'stock.date',
-            'stock.sn',
-        ])->where('stock.status', 1)
-        ->orderBy('stock.id', 'desc');
-
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                if ($where['field'] == 'stock.arear_money') {
-                    if ($where['search'] == 0) {
-                        $model->where($where['field'], 0);
-                    } else {
-                        $model->where($where['field'], '>', 0);
-                    }
-                } else {
-                    $model->search($where);
-                }
-            }
-        }
-
         if (Input::ajax()) {
+            $model = Repayment::orderBy('stock.id', 'desc')
+            ->leftJoin('stock', 'stock_repayment.stock_id', '=', 'stock.id')
+            ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
+            ->leftJoin('store', 'store.id', '=', 'stock.store_id')
+            ->select([
+                'stock_repayment.*',
+                'store.name as store_name',
+                'supplier.name as supplier_name',
+                'supplier.personal_mobile as supplier_personal_mobile',
+                'stock.date',
+                'stock.sn',
+            ])->where('stock.status', 1)
+            ->orderBy('stock.id', 'desc');
+
+            foreach ($search['where'] as $where) {
+                $model->search($where);
+            }
             return response()->json($model->paginate($search['limit']));
         }
 
@@ -155,9 +144,9 @@ class PurchaseRepaymentController extends DefaultController
             $gets = Input::get();
             
             $stock = Stock::where('id', $stock_id)->first();
-            $arear_money = $stock->arear_money;
+            $arrear_money = $stock->arrear_money;
             $rules = [
-                'money' => 'required|numeric|between:1,'.$arear_money,
+                'money' => 'required|numeric|between:1,'.$arrear_money,
             ];
             $v = Validator::make($gets, $rules, [], [
                 'money' => '还款金额',
@@ -166,11 +155,11 @@ class PurchaseRepaymentController extends DefaultController
                 return $this->json(join('<br>', $v->errors()->all()));
             }
             $model = new Repayment;
-            $model->arear_money = $arear_money;
+            $model->arrear_money = $arrear_money;
             $model->fill($gets)->save();
 
             // 减少欠款金额
-            $stock->arear_money = $arear_money - $gets['money'];
+            $stock->arrear_money = $arrear_money - $gets['money'];
             // 增加付款金额
             $stock->pay_money = $stock->pay_money + $gets['money'];
             $stock->save();

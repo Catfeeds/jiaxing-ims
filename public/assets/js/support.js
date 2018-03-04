@@ -1,3 +1,5 @@
+var select2List = {};
+
 $(function() {
 
     var $document = $(document);

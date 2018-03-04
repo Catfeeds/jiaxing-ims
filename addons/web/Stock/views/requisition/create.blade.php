@@ -1,10 +1,10 @@
 <div class="panel no-border">
 
-@include('menus/requisition')
+@include('tabs', ['tabKey' => 'stock.requisition'])
 
 <div class="wrapper-sm">
     <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
-    <a class="btn btn-sm btn-info" href="javascript:_submit();"> <i class="fa fa-check"></i> 保存</a>
+    <a class="btn btn-sm btn-info" href="javascript:formStore();"> <i class="fa fa-check"></i> 保存</a>
 </div>
 <div class="wrapper-sm b-t">
 
@@ -32,7 +32,6 @@
     </div>
 </div>
 </div>
-
     <div id="jqgrid-editor-container" class="m-t m-b">
         <table id="grid-table"></table>
     </div>
@@ -40,34 +39,10 @@
     <div class="form-group">
         <textarea class="form-control" type="text" name="remark" id="remark" placeholder="暂无备注">{{$row['remark']}}</textarea>
     </div>
-    <!--
-    <div class="form-inline">
-    <div class="row">
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label">应收金额</label>
-    <input type="text" name="rec_money" readonly="readonly" value="{{$row['rec_money']}}" id="rec_money" class="form-control input-sm money">
-    </div></div>
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label"><span class="red"> * </span> 优惠金额</label>
-    <input type="text" name="discount_money" id="discount_money" value="{{$row['discount_money']}}" class="form-control input-sm money">
-    </div></div>
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label"><span class="red"> * </span> 本次付款</label>
-    <input type="text" name="pay_money" id="pay_money" value="{{$row['pay_money']}}" class="form-control input-sm money">
-    </div></div>
-    <div class="form-group">
-    <div class="col-sm-12">
-    <label for="sort" class="control-label">本次欠款</label>
-    <input type="text" name="arear_money" id="arear_money" readonly="readonly" value="{{$row['arear_money']}}" class="form-control input-sm money">
-    </div></div>
-    
-</div>-->
 </div>
 
-<input type="hidden" name="quantity" id="total_quantity" value="0" />
+<input type="hidden" name="total_quantity" id="total_quantity" value="0" />
+<input type="hidden" name="total_money" id="total_money" value="0.00" />
 
 </form>
 
@@ -78,7 +53,6 @@
 var t = null;
 var columns = {{json_encode($columns)}};
 var select2List = {};
-var rec_money = 0.00;
 
 $(function() {
 
@@ -91,27 +65,19 @@ $(function() {
         }
     });
 
-    select2List.supplier_id = $("#supplier_id");
-    select2List.supplier_id.select2Field({
-        ajax: {
-            url: '/stock/supplier/dialog'
-        }
-    });
-
     var footerCalculate = function(rowid) {
 
-        var price = $(this).jqGrid('getCell', rowid, 'price');
-        var quantity = $(this).jqGrid('getCell', rowid, 'quantity');
-        $(this).jqGrid('setCell', rowid, 'money', quantity * price);
+        var cost_price = $(this).jqGrid('getCell', rowid, 'cost_price');
+        var quantity   = $(this).jqGrid('getCell', rowid, 'quantity');
+        $(this).jqGrid('setCell', rowid, 'cost_money', quantity * cost_price);
         
-        var quantity = $(this).getCol('quantity', false, 'sum');
-        var money = $(this).getCol('money', false, 'sum');
+        var quantity   = $(this).getCol('quantity', false, 'sum');
+        var cost_money = $(this).getCol('cost_money', false, 'sum');
         
         $('#total_quantity').val(quantity);
+        $('#total_money').val(cost_money);
 
-        sumMoney(money, 'rec');
-
-        $(this).footerData('set',{product_name:'合计:', quantity: quantity, money: money});
+        $(this).footerData('set',{product_name:'合计:', quantity: quantity, cost_money: cost_money});
     }
 
     t = $('#grid-table').jqGrid({
@@ -143,49 +109,33 @@ $(function() {
                         dataInit: $.jgrid.celledit.dialog({
                             srcField: 'product_id',
                             mapField: {
-                                category_name:'category_name',
                                 warehouse_name:'warehouse_name',
+                                category_name:'category_name',
+                                product_name:'product_name',
+                                product_barcode:'product_barcode',
+                                product_spec:'product_spec',
+                                product_unit:'product_unit',
+                                stock_quantity:'stock_quantity',
+
                                 warehouse_id:'warehouse_id',
-                                product_spec:'spec', 
-                                product_id:'id',
-                                product_name:'name',
-                                product_code:'barcode',
-                                product_spec:'spec',
-                                last_price:'last_price',
+                                product_id:'product_id',
+                                price:'product_price',
+                                cost_price:'stock_cost',
+                                quantity: 1,
                             },
                             suggest: {
-                                url: 'stock/product/dialog',
+                                url: 'stock/stock-warehouse/dialog',
                                 params: {order:'asc', limit:1000}
                             },
                             dialog: {
                                 title: '商品管理',
-                                url: 'stock/product/dialog',
+                                url: 'stock/stock-warehouse/dialog',
                                 params: {}
                             }
                         })
                     }
                 });
             }
-
-            if(cellname == 'warehouse_name') {
-                t.setColProp(cellname, {
-                    editoptions: {
-                        dataInit: $.jgrid.celledit.dropdown({
-                            mapField: {
-                                warehouse_id:'id',
-                            },
-                            valueField: 'id',
-                            textField: 'text',
-                            suggest: {
-                                url: 'stock/warehouse/dialog',
-                                cache: false,
-                                params: {warehouse_id:row.warehouse_id}
-                            }
-                        })
-                    }
-                });
-            }
-
         },
         // 进入编辑后调用
         afterEditCell: function(rowid, cellname, value, iRow, iCol) {
@@ -210,41 +160,9 @@ $(function() {
     for(var i=1; i <= 10; i++) {
         t.jqGrid('addRowData', i, {});
     }
-
-    // 监听金额改变
-    $('input.money').on('input propertychange', function() {
-
-        var money = $(this).val();
-        if(this.id == 'discount_money') {
-            sumMoney(money, 'discount');
-        }
-        if(this.id == 'pay_money') {
-            sumMoney(money, 'pay');
-        }
-    });
-
 });
 
-function sumMoney(money, type) {
-    if(type == 'rec') {
-        $('#rec_money').val(money);
-        $('#pay_money').val(money);
-        $('#discount_money').val(0);
-        $('#arear_money').val(0);
-    }
-    if(type == 'pay') {
-        var rec       = $('#rec_money').val();
-        var discount  = $('#discount_money').val();
-        $('#arear_money').val(rec - money - discount);
-    }
-    if(type == 'discount') {
-        var rec = $('#rec_money').val();
-        $('#pay_money').val(rec - money);
-        $('#arear_money').val(0);
-    }
-}
-
-function _submit() {
+function formStore() {
 
     var params = {};
 

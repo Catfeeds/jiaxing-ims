@@ -118,28 +118,27 @@ class ServiceController extends DefaultController
 
         $query = $search['query'];
 
-        $model = Product::where('product.type', 2)
-        ->LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
-        ->LeftJoin('store', 'store.id', '=', 'product.store_id')
-        ->orderBy('product.id', 'asc')
-        ->select([
-            'product.*',
-            'product_category.name as category_name',
-            'store.name as store_name'
-        ]);
+        if (Input::ajax()) {
+            $model = Product::where('product.type', 2)
+            ->LeftJoin('product_category', 'product_category.id', '=', 'product.category_id')
+            ->LeftJoin('store', 'store.id', '=', 'product.store_id')
+            ->orderBy('product.id', 'asc')
+            ->select([
+                'product.*',
+                'product_category.name as category_name',
+                'store.name as store_name'
+            ]);
 
-        foreach ($search['where'] as $where) {
-            if ($where['active']) {
-                if ($where['field'] == 'product.category_id') {
-                    $category = ProductCategory::where('id', $where['search'])->first();
-                    $model->whereBetween('product_category.lft', [$category->lft, $category->rgt]);
-                } else {
-                    $model->search($where);
+            foreach ($search['where'] as $where) {
+                if ($where['active']) {
+                    if ($where['field'] == 'product.category_id') {
+                        $category = ProductCategory::where('id', $where['search'])->first();
+                        $model->whereBetween('product_category.lft', [$category->lft, $category->rgt]);
+                    } else {
+                        $model->search($where);
+                    }
                 }
             }
-        }
-
-        if (Input::ajax()) {
             return response()->json($model->paginate($search['limit']));
         }
 

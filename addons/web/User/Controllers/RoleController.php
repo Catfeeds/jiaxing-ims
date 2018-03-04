@@ -151,12 +151,12 @@ class RoleController extends DefaultController
 
         $roles = Role::orderBy('lft', 'asc')->get()->toNested();
 
-        return $this->display(array(
+        return $this->display([
             'assets'  => $assets,
             'modules' => $modules,
             'query'   => $query,
             'roles'   => $roles,
-        ));
+        ]);
     }
 
     // 角色编辑

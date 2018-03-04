@@ -18,13 +18,10 @@
 </style>
 
 <div class="panel no-border">
-
-    @include('menus/purchase')
-
+    @include('tabs', ['tabKey' => 'stock.purchase'])
     <form id="search-form-simple" class="search-form form-inline" action="{{url()}}" method="get">
         @include('searchForm3')
     </form>
-
 </div>
 
 <div class="row row-sm row-todo">
