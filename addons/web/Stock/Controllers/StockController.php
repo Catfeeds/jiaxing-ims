@@ -246,7 +246,7 @@ class StockController extends DefaultController
             $model = StockWarehouse::leftJoin('product', 'product.id', '=', 'stock_warehouse.product_id')
             ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
             ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_warehouse.warehouse_id')
-            ->leftJoin('store', 'store.id', '=', 'stock_warehouse.store_id')
+            ->leftJoin('store', 'store.id', '=', 'warehouse.store_id')
             ->select([
                 'stock_warehouse.*',
                 'product.name as product_name',
@@ -378,7 +378,7 @@ class StockController extends DefaultController
             $model = StockWarehouse::leftJoin('product', 'product.id', '=', 'stock_warehouse.product_id')
             ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
             ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_warehouse.warehouse_id')
-            ->leftJoin('store', 'store.id', '=', 'stock_warehouse.store_id')
+            ->leftJoin('store', 'store.id', '=', 'warehouse.store_id')
             ->selectRaw('
                 stock_warehouse.*,
                 product.name as product_name,

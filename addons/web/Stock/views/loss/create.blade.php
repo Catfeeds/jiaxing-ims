@@ -52,17 +52,11 @@
 
 var t = null;
 var columns = {{json_encode($columns)}};
-var select2List = {};
 
 $(function() {
 
-    select2List.user_id = $("#user_id");
-    select2List.user_id.select2Field({
-        width: '153px',
-        //multiple: true,
-        ajax: {
-            url: '/user/user/dialog'
-        }
+    $.each(select2List, function(key, row) {
+        select2List[key].el = $('#' + key).select2Field(row.options);
     });
 
     var footerCalculate = function(rowid) {
@@ -100,7 +94,7 @@ $(function() {
         beforeEditCell: function(rowid, cellname, value, iRow, iCol) {
 
             // 编辑前插入class
-            $("#" + rowid).find('td').eq(iCol).addClass('edit-cell-item');
+            $(this.rows[iRow]).find('td').eq(iCol).addClass('edit-cell-item');
             var row = t.jqGrid('getRowData', rowid);
 
             if(cellname == 'product_name') {
@@ -127,8 +121,17 @@ $(function() {
                                 url: 'stock/stock-warehouse/dialog',
                                 params: {order:'asc', limit:1000}
                             },
+                            beforeSelect: function(row) {
+                                if (row['stock_quantity'] == 0) {
+                                    $.toastr('error', row.product_name + '库存不足。', '错误');
+                                    return false;
+                                }
+                                row['quantity'] = 1;
+                                return row;
+                            },
                             dialog: {
                                 title: '商品管理',
+                                dialogClass: 'modal-lg',
                                 url: 'stock/stock-warehouse/dialog',
                                 params: {}
                             }
@@ -143,7 +146,7 @@ $(function() {
         // 保存服务器时调用
         afterRestoreCell: function(rowid, value, iRow, iCol) {
             // 编辑cell后保存时删除class
-            $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
+            $(this.rows[iRow]).find('td').eq(iCol).removeClass('edit-cell-item');
         },
         // 保存在本地的时候调用
         afterSaveCell: function(rowid, cellname, value, iRow, iCol) {
@@ -152,7 +155,7 @@ $(function() {
             footerCalculate.call(this, rowid);
 
             // 编辑cell后保存时删除class
-            $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
+            $(this.rows[iRow]).find('td').eq(iCol).removeClass('edit-cell-item');
         }
     });
 
@@ -167,7 +170,7 @@ function _submit() {
     var params = {};
 
     $.each(select2List, function(k, v) {
-        params[k] = v.select2('val');
+        params[k] = v.el.select2('val');
     });
 
     var dataset = t.jqGrid('getRowsData');

@@ -5582,7 +5582,7 @@ $.jgrid.extend({
 				cc.html("").append(elc).attr("tabindex","0");
 				$.jgrid.bindEv.call($t, elc, opt);
 				window.setTimeout(function () { $(elc).focus();},1);
-				$("input, select, textarea",cc).on("keydown",function(e) {
+				$("input, select, textarea", cc).on("keydown", function(e) {
 					if (e.keyCode === 27) {
 						if($("input.hasDatepicker",cc).length >0) {
 							if( $(".ui-datepicker").is(":hidden") )  { $($t).jqGrid("restoreCell",iRow,iCol); }
@@ -5684,12 +5684,13 @@ $.jgrid.extend({
 						}
 						break;
 				}
+
 				// The common approach is if nothing changed do not do anything
 				if (v2 !== $t.p.savedRow[fr].v){
 					var vvv = $($t).triggerHandler("jqGridBeforeSaveCell", [$t.rows[iRow].id, nm, v, iRow, iCol]);
 					if (vvv) {v = vvv; v2=vvv;}
 					if ($.isFunction($t.p.beforeSaveCell)) {
-						var vv = $t.p.beforeSaveCell.call($t, $t.rows[iRow].id,nm, v, iRow,iCol);
+						var vv = $t.p.beforeSaveCell.call($t, $t.rows[iRow].id, nm, v, iRow, iCol);
 						if (vv) {v = vv; v2=vv;}
 					}
 					var cv = $.jgrid.checkValues.call($t,v,iCol), nuem = false;

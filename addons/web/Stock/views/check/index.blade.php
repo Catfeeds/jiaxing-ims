@@ -31,10 +31,10 @@
 
 <script>
 var routes = {
-    index: 'stock/purchase-return/index',
-    invalidEdit: 'stock/purchase-return/invalidEdit',
-    show: 'stock/purchase-return/show',
-    export: 'stock/purchase-return/export',
+    index: 'stock/check/index',
+    invalidEdit: 'stock/check/invalidEdit',
+    show: 'stock/check/show',
+    export: 'stock/check/export',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};

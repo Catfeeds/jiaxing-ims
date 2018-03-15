@@ -16,7 +16,6 @@ class NotificationController extends Controller
      */
     public function indexAction()
     {
-
         $columns = [[
             'name'     => 'content',
             'index'    => 'message.content',
@@ -148,9 +147,6 @@ class NotificationController extends Controller
     public function createAction()
     {
         $id  = Input::get('id');
-
-        // $row = DB::table('user_message')->find($id);
-
         $row = User::find($id);
         return $this->render([
             'row' => $row,

@@ -19,6 +19,8 @@ mix.combine([
     'public/assets/vendor/colorpicker/jquery.simplecolorpicker.js',
     'public/assets/vendor/toastr/toastr.js',
 
+    'public/assets/vendor/fancytree/jquery.fancytree.js',
+
     'public/assets/vendor/select2/select2.js',
     'public/assets/vendor/select2/zh-CN.js',
 
@@ -47,6 +49,8 @@ mix.combine([
     'public/assets/vendor/bootstrap/css/glyphicon.css',
     'public/assets/vendor/toastr/toastr.css',
     'public/assets/vendor/colorpicker/jquery.simplecolorpicker.css',
+
+    'public/assets/vendor/fancytree/skin-win8/ui.fancytree.css',
 
     'public/assets/vendor/select2/select2.css',
 

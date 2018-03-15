@@ -32,6 +32,8 @@
 	 	this.items = options.data.items;
 		this.selected = options.data.selected;
 
+		this.options = options;
+
 		this.arrow = options.arrow || 'icon-search';
 
 		this.name = options.name;
@@ -334,14 +336,7 @@
 		_updateInput: function() {
 			var item = this._getAll().filter('.option-selected');
 			var index = item.data('index');
-
 			this.onSelect.call(this, this.items[index]);
-			/*
-			if (index) {
-				this.onSelect.call(this, this.items[index]);
-			} else {
-				this.onSelect.call(this, this.items[index]);
-			}*/
 		},
 		_focus: function (event) {
 			// Toggle focus class
@@ -389,52 +384,47 @@
 			}
 		},
 		_dialog: function() {
-			var me = this;
-			var $jqgrid = $('#' + me.jqgrid);
-			var jqgrid  = $jqgrid[0];
-			var p = jqgrid.p;
 
-			var ir = p.iRow,
-				ic = p.iCol,
-				rowid = p.selrow;
+			var me  = this,
+			options = me.options,
+			$jqgrid = $('#' + options.jqgrid),
+			jqgrid  = $jqgrid[0],
+			p       = jqgrid.p,
+			ir      = p.iRow,
+			ic      = p.iCol,
+			rowid   = p.selrow;
 
-			function abc() {
+			function selected() {
 
-				var $table = $('#dialog-product-' + me.jqgrid);
+				var $table = $('#dialog-product-' + options.jqgrid);
 				var rows = $table.jqGrid('getSelections');
 				if(rows.length == 0) {
 					return;
 				}
 
 				for(var i = 0; i < rows.length; i ++) {
+					if (options.select.call(me, rows[i], rowid, ir, ic)) {
+						ir = ir + 1;
+						var tr = jqgrid.rows[ir];
+						if(tr == undefined) {
+							rowid = p.data.length + 1;
+							$jqgrid.jqGrid('addRowData', rowid, {}, 'last');
+						} else {
+							rowid = tr.id;
+						}
+						$jqgrid.jqGrid('nextCell', ir, ic - 1);
 
-					// 添加已编辑
-					$jqgrid.find('#' + rowid).addClass('edited');
-
-					// 关闭编辑框
-					$jqgrid.jqGrid('saveCell', ir, ic);
-					// 循环映射字段
-					$.each(me.dialog.mapField, function(k, field) {
-						$jqgrid.jqGrid('setCell', rowid, k, rows[i][field]);
-					});
-
-					ir = ir + 1;
-
-					var tr = jqgrid.rows[ir];
-
-					if(tr == undefined) {
-						rowid = jqgrid.p.data.length + 1;
-						$jqgrid.jqGrid('addRowData', rowid, {}, 'last');
 					} else {
-						rowid = tr.id;
+						return false;
 					}
-					$jqgrid.jqGrid('nextCell', ir, ic - 1);
 				}
+				return true;
 			}
 
-			$('#dialog-product').__dialog({
+			$('#dialog-product-modal-' + options.jqgrid).__dialog({
 				title: me.dialog.title,
 				url: me.dialog.url,
+				dialogClass: me.dialog.dialogClass,
 				onClose: function() {
 					$(this).dialog('close');
 					$jqgrid.jqGrid('resizeGrid');
@@ -443,14 +433,15 @@
 					text: '选中',
 					'class': 'btn-info',
 					click: function() {
-						abc();
+						selected();
 						$jqgrid.jqGrid('resizeGrid');
+						
 					}
 				},{
 					text: '选中关闭',
 					'class': 'btn-black',
 					click: function() {
-						abc();
+						selected();
 						$(this).dialog('close');
 						$jqgrid.jqGrid('resizeGrid');
 					}

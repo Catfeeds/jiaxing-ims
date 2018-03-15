@@ -1,103 +1,72 @@
 <div class="panel no-border">
 
-@include('tabs', ['tabKey' => 'stock.check'])
+    @include('tabs', ['tabKey' => 'stock.check'])
 
-<div class="wrapper-sm">
-    <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
-    <a class="btn btn-sm btn-info" href="javascript:formStore();"> <i class="fa fa-check"></i> 保存</a>
-</div>
-<div class="wrapper-sm b-t">
-
-<form method="post" enctype="multipart/form-data" action="{{url()}}" id="myform" name="myform">
-
-<div class="form-inline">
-    <div class="row">
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label"><span class="red"> * </span> 单据日期</label>
-            <input type="text" name="date" data-toggle="date" value="{{date('Y-m-d')}}" id="date" class="form-control input-sm">
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label">单据编号</label>
-            <input type="text" name="sn" readonly="readonly" id="sn" value="{{date('YmdHis')}}" class="form-control input-sm">
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="user_id" class="control-label"><span class="red"> * </span> 报损员</label>
-            {{Dialog::select2('user','user_id', $row['user_id'], 0, 0)}}
-        </div>
-    </div>
-</div>
-</div>
-    <div id="jqgrid-editor-container" class="m-t m-b">
-        <table id="grid-table"></table>
+    <div class="wrapper-sm">
+        <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
+        <a class="btn btn-sm btn-info" href="javascript:formCreate(8);"> <i class="fa fa-pencil-square-o"></i> 生成盘盈</a>
+        <a class="btn btn-sm btn-info" href="javascript:formCreate(9);"> <i class="fa fa-pencil-square-o"></i> 生成盘亏</a>
     </div>
 
-    <div class="form-group">
-        <textarea class="form-control" type="text" name="remark" id="remark" placeholder="暂无备注">{{$row['remark']}}</textarea>
-    </div>
+    <div class="wrapper-sm b-t">
 
-    <div class="form-inline">
-        <div class="row">
+        <form method="post" class="form-inline" action="{{url()}}" id="query-check-create">
+
             <div class="form-group">
-                <div class="col-sm-12">
-                    <label for="sort" class="control-label">应退金额</label>
-                    <input type="text" name="total_money" readonly="readonly" value="{{$row['total_money']}}" id="total_money" class="form-control input-sm money">
-                </div>
+                <label for="warehouse_id">仓库</label>
+                <select class="form-control input-sm" name="warehouse_id" id="warehouse_id">
+                    <option value=""> - </option>
+                    @foreach($warehouses as $warehouse)
+                        <option value="{{$warehouse['id']}}">{{$warehouse['name']}}</option>
+                    @endforeach
+                </select>
             </div>
-        <div class="form-group">
-            <div class="col-sm-12">
-                <label for="sort" class="control-label"><span class="red"> * </span> 实际退款</label>
-                <input type="text" name="pay_money" id="pay_money" value="{{$row['pay_money']}}" class="form-control input-sm money">
+
+            <span class="hidden-xs">&nbsp;</span>
+
+            <div class="form-group">
+                <label for="warehouse_id">商品类别</label>
+                <select class="form-control input-sm" name="category_id" id="category_id">
+                    <option value=""> - </option>
+                    @foreach($categorys as $category)
+                        <option value="{{$category['id']}}">{{$category['layer_space']}}{{$category['name']}}</option>
+                    @endforeach
+                </select>
             </div>
+            
+            <button id="query-check-submit" class="btn btn-sm btn-default"> <i class="fa fa-search"></i> 查询</button>
+        </form>
+
+        <div id="jqgrid-editor-container" class="m-t-sm m-b">
+            <table id="jqgrid-check-create"></table>
         </div>
+
     </div>
-
-</div>
-
-<input type="hidden" name="total_quantity" id="total_quantity" value="0" />
-
-</form>
 
 </div>
 
 <script type="text/javascript">
 
-var t = null;
+var jqgrid_check_create = null;
+var jqgrid_check_rows   = [];
+var stock_type_id       = 0;
 var columns = {{json_encode($columns)}};
-var select2List = {};
 
 $(function() {
 
-    select2List.user_id = $("#user_id");
-    select2List.user_id.select2Field({
-        width: '153px',
-        //multiple: true,
-        ajax: {
-            url: '/user/user/dialog'
-        }
-    });
-
-    var footerCalculate = function(rowid) {
-
-        var cost_price = $(this).jqGrid('getCell', rowid, 'cost_price');
+    var footerRowRender = function(rowid) {
+        var stock_quantity = $(this).jqGrid('getCell', rowid, 'stock_quantity');
         var quantity   = $(this).jqGrid('getCell', rowid, 'quantity');
-        $(this).jqGrid('setCell', rowid, 'cost_money', quantity * cost_price);
-        
-        var quantity   = $(this).getCol('quantity', false, 'sum');
-        var cost_money = $(this).getCol('cost_money', false, 'sum');
-        
-        $('#total_quantity').val(quantity);
-        $('#total_money').val(cost_money);
-        $('#pay_money').val(cost_money);
-
-        $(this).footerData('set',{product_name:'合计:', quantity: quantity, cost_money: cost_money});
+        $(this).jqGrid('setCell', rowid, 'check', quantity - stock_quantity);
+    };
+    var footerRender = function() {
+        var stock_quantity = $(this).getCol('stock_quantity', false, 'sum');
+        var quantity       = $(this).getCol('quantity', false, 'sum');
+        var check          = $(this).getCol('check', false, 'sum');
+        $(this).footerData('set',{product_name:'合计:', stock_quantity: stock_quantity, quantity: quantity, check: check});
     }
 
-    t = $('#grid-table').jqGrid({
+    jqgrid_check_create = $('#jqgrid-check-create').jqGrid({
         caption: '',
         datatype: 'local',
         colModel: columns,
@@ -108,51 +77,14 @@ $(function() {
         viewrecords: true,
         rownumbers: true,
         footerrow: true,
-        height: 300,
+        height: getPanelHeight(),
         gridComplete: function() {
             $(this).jqGrid('setColsWidth');
-            footerCalculate.call(this);
         },
         // 进入编辑前调用
         beforeEditCell: function(rowid, cellname, value, iRow, iCol) {
-
             // 编辑前插入class
-            $("#" + rowid).find('td').eq(iCol).addClass('edit-cell-item');
-            var row = t.jqGrid('getRowData', rowid);
-
-            if(cellname == 'product_name') {
-                t.setColProp(cellname, {
-                    editoptions: {
-                        dataInit: $.jgrid.celledit.dialog({
-                            srcField: 'product_id',
-                            mapField: {
-                                warehouse_name:'warehouse_name',
-                                category_name:'category_name',
-                                product_name:'product_name',
-                                product_barcode:'product_barcode',
-                                product_spec:'product_spec',
-                                product_unit:'product_unit',
-                                stock_quantity:'stock_quantity',
-
-                                warehouse_id:'warehouse_id',
-                                product_id:'product_id',
-                                price:'product_price',
-                                cost_price:'stock_cost',
-                                quantity: 1,
-                            },
-                            suggest: {
-                                url: 'stock/stock-warehouse/dialog',
-                                params: {order:'asc', limit:1000}
-                            },
-                            dialog: {
-                                title: '商品管理',
-                                url: 'stock/stock-warehouse/dialog',
-                                params: {}
-                            }
-                        })
-                    }
-                });
-            }
+            $(this.rows[iRow]).find('td').eq(iCol).addClass('edit-cell-item');
         },
         // 进入编辑后调用
         afterEditCell: function(rowid, cellname, value, iRow, iCol) {
@@ -160,67 +92,103 @@ $(function() {
         // 保存服务器时调用
         afterRestoreCell: function(rowid, value, iRow, iCol) {
             // 编辑cell后保存时删除class
-            $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
+            $(this.rows[iRow]).find('td').eq(iCol).removeClass('edit-cell-item');
         },
         // 保存在本地的时候调用
         afterSaveCell: function(rowid, cellname, value, iRow, iCol) {
-
-            // 计算页脚数据
-            footerCalculate.call(this, rowid);
-
+            footerRowRender.call(this, rowid);
+            footerRender.call(this);
             // 编辑cell后保存时删除class
-            $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
+            $(this.rows[iRow]).find('td').eq(iCol).removeClass('edit-cell-item');
         }
     });
 
-    // 初始化行数据
-    for(var i=1; i <= 10; i++) {
-        t.jqGrid('addRowData', i, {});
-    }
+    $('#query-check-submit').on('click', function() {
+        var query = $('#query-check-create').serialize();
+        $.post('{{url("create")}}', query, function(res) {
+            if(res.status) {
+                jqgrid_check_create.jqGrid('clearGridData').jqGrid('setGridParam', {
+                    datatype: 'local',
+                    data: res.data
+                }).trigger('reloadGrid');
+            }
+        });
+        return false;
+    });
+
 });
 
-function formStore() {
+function formCreate(type) {
 
-    var params = {};
-
-    $.each(select2List, function(k, v) {
-        params[k] = v.select2('val');
-    });
-
-    var dataset = t.jqGrid('getRowsData');
-    if(dataset.v === true) {
-        if(dataset.data.length == 0) {
-            $.toastr('error', '商品不能为空。', '错误');
-            return;
-        } else {
-            params.stock_line = dataset.data;
-        }
+    var res = jqgrid_check_create.jqGrid('getRows', 'product_id');
+    if (res.data.length == 0) {
+        $.toastr('error', '盘点仓库不能为空。', '错误');
+        return;
     } else {
+        stock_type_id = type;
+        jqgrid_check_rows = [];
+        if (type == 8) {
+            var title = '库存盘盈单';
+            $.each(res.data, function(k, v) {
+                if(v.check > 0) {
+                    v.quantity = Math.abs(v.check);
+                    jqgrid_check_rows.push(v);
+                }
+            });
+        }
+        if (type == 9) {
+            var title = '库存盘亏单';
+            $.each(res.data, function(k, v) {
+                if(v.check < 0) {
+                    v.quantity = Math.abs(v.check);
+                    jqgrid_check_rows.push(v);
+                }
+            });
+        }
+    }
+
+    if (jqgrid_check_rows.length == 0) {
+        $.toastr('error', '盘点仓库数量不能为空。', '错误');
         return;
     }
 
-    var query = $('#myform').serialize();
-    $.post('{{url("create")}}', query + '&' + $.param(params), function(res) {
-        if(res.status) {
-            $.messager.alert('提醒', res.data, function() {
-                location.href = res.url;
+    formDialog({
+        title: title,
+        url: app.url('stock/check/store'),
+        id: 'stock-check-store',
+        formId: 'check-store-form',
+        dialogClass: 'modal-lg',
+        onBeforeSend: function(query) {
+            var res = jqgrid_check_store.jqGrid('getRows', 'product_id');
+            if (res.errors.length > 0) {
+                var v = res.errors[0];
+                jqgrid_check_store.jqGrid("editCell", v[3], v[4], true);
+                $.toastr('error', v[1], '错误');
+                return false;
+            }
+            $.each(select2List, function(k, v) {
+                query[k] = v.el.select2('val');
             });
-        } else {
-            $.toastr('error', res.data);
+            query.stock_line = res.data;
+            return query;
+        },
+        onSuccess: function(res) {
+            if (res.status) {
+                $.toastr('success', res.data, '提醒');
+                $(this).dialog('close');
+            } else {
+                $.toastr('error', res.data, '提醒');
+            }
         }
     });
 }
 
 function getPanelHeight() {
     var list = $('#jqgrid-editor-container').position();
-    return top.iframeHeight - list.top - 150;
+    return top.iframeHeight - list.top - 106;
 }
 
-// 框架页面改变大小时会调用此方法
-function iframeResize() {
-    // 框架改变大小时设置Panel高度
-    t.jqGrid('setPanelHeight', getPanelHeight());
-    // resize jqgrid大小
-    t.jqGrid('resizeGrid');
-}
+$(window).on('resize', function() {
+	jqgrid_check_create.jqGrid('setGridHeight', getPanelHeight());
+});
 </script>

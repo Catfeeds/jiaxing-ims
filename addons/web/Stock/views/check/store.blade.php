@@ -1,59 +1,41 @@
-<div class="panel no-border">
-
-@include('tabs', ['tabKey' => 'stock.transfer'])
-
 <div class="wrapper-sm">
-    <a class="btn btn-sm btn-default" href="javascript:history.back();"><i class="fa fa-remove"></i> 取消</a>
-    <a class="btn btn-sm btn-info" href="javascript:formStore();"> <i class="fa fa-check"></i> 保存</a>
-</div>
-<div class="wrapper-sm b-t">
 
-<form method="post" enctype="multipart/form-data" action="{{url()}}" id="myform" name="myform">
+<form method="post" action="{{url()}}" id="check-store-form">
 
 <div class="form-inline">
+
     <div class="row">
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label"><span class="red"> * </span> 调出门店</label>
-            {{Dialog::select2('store','out_store_id', $row['out_store_id'], 0, 0)}}
+        <div class="form-group">
+            <div class="col-sm-12">
+                <label for="sort" class="control-label"><span class="red"> * </span> 单据日期</label>
+                <input type="text" name="date" data-toggle="date" value="{{date('Y-m-d')}}" id="date" class="form-control input-sm">
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label"><span class="red"> * </span> 调入门店</label>
-            {{Dialog::select2('store','in_store_id', auth()->user()->store_id, 0, 1)}}
+        <div class="form-group">
+            <div class="col-sm-12">
+                <label for="sort" class="control-label">单据编号</label>
+                <input type="text" name="sn" readonly="readonly" id="sn" value="{{date('YmdHis')}}" class="form-control input-sm">
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label"><span class="red"> * </span> 单据日期</label>
-            <input type="text" name="date" data-toggle="date" value="{{date('Y-m-d')}}" id="date" class="form-control input-sm">
+        <div class="form-group">
+            <div class="col-sm-12">
+                <label for="user_id" class="control-label"><span class="red"> * </span> 盘点员</label>
+                {{Dialog::select2('user','user_id', $row['user_id'], 0, 0)}}
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="sort" class="control-label">单据编号</label>
-            <input type="text" name="sn" readonly="readonly" id="sn" value="{{date('YmdHis')}}" class="form-control input-sm">
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-12">
-            <label for="user_id" class="control-label"><span class="red"> * </span> 调拨员</label>
-            {{Dialog::select2('user','user_id', $row['user_id'], 0, 0)}}
-        </div>
-    </div>
-</div>
-</div>
-    <div id="jqgrid-editor-container" class="m-t m-b">
-        <table id="grid-table"></table>
-    </div>
-
-    <div class="form-group">
-        <textarea class="form-control" type="text" name="remark" id="remark" placeholder="暂无备注">{{$row['remark']}}</textarea>
     </div>
 
 </div>
 
+<div id="jqgrid-editor-container" class="m-t m-b">
+    <table id="jqgrid-check-store"></table>
+</div>
+
+<div class="form-group m-b-none">
+    <textarea class="form-control" type="text" name="remark" id="remark" placeholder="暂无备注">{{$row['remark']}}</textarea>
+</div>
+
+<input type="hidden" name="type_id" id="stock_type_id" value="0" />
 <input type="hidden" name="total_quantity" id="total_quantity" value="0" />
 <input type="hidden" name="total_money" id="total_money" value="0.00" />
 
@@ -63,7 +45,7 @@
 
 <script type="text/javascript">
 
-var t = null;
+var jqgrid_check_store = null;
 var columns = {{json_encode($columns)}};
 
 $(function() {
@@ -72,23 +54,23 @@ $(function() {
         select2List[key].el = $('#' + key).select2Field(row.options);
     });
 
-    var footerCalculate = function(rowid) {
+    $('#stock_type_id').val(stock_type_id);
 
+    var subtotalFooter = function(rowid) {
         var cost_price = $(this).jqGrid('getCell', rowid, 'cost_price');
         var quantity   = $(this).jqGrid('getCell', rowid, 'quantity');
         $(this).jqGrid('setCell', rowid, 'cost_money', quantity * cost_price);
-        
+    }
+
+    var totalFooter = function() {
         var quantity   = $(this).getCol('quantity', false, 'sum');
         var cost_money = $(this).getCol('cost_money', false, 'sum');
-        
         $('#total_quantity').val(quantity);
         $('#total_money').val(cost_money);
-        $('#pay_money').val(cost_money);
-
         $(this).footerData('set',{product_name:'合计:', quantity: quantity, cost_money: cost_money});
     }
 
-    t = $('#grid-table').jqGrid({
+    jqgrid_check_store = $('#jqgrid-check-store').jqGrid({
         caption: '',
         datatype: 'local',
         colModel: columns,
@@ -100,19 +82,25 @@ $(function() {
         rownumbers: true,
         footerrow: true,
         height: 300,
+        data: jqgrid_check_rows,
         gridComplete: function() {
             $(this).jqGrid('setColsWidth');
-            footerCalculate.call(this);
+            var me = this;
+            var ids = $(this).jqGrid('getDataIDs');
+            $.each(ids, function(k, v) {
+                subtotalFooter.call(me, v);
+            });
+            totalFooter.call(this);
         },
         // 进入编辑前调用
         beforeEditCell: function(rowid, cellname, value, iRow, iCol) {
 
             // 编辑前插入class
             $(this.rows[iRow]).find('td').eq(iCol).addClass('edit-cell-item');
-            var row = t.jqGrid('getRowData', rowid);
+            var row = jqgrid_check_store.jqGrid('getRowData', rowid);
 
             if(cellname == 'product_name') {
-                t.setColProp(cellname, {
+                jqgrid_check_store.setColProp(cellname, {
                     editoptions: {
                         dataInit: $.jgrid.celledit.dialog({
                             srcField: 'product_id',
@@ -137,6 +125,7 @@ $(function() {
                             },
                             dialog: {
                                 title: '商品管理',
+                                dialogClass: 'modal-lg',
                                 url: 'stock/stock-warehouse/dialog',
                                 params: {}
                             }
@@ -155,63 +144,13 @@ $(function() {
         },
         // 保存在本地的时候调用
         afterSaveCell: function(rowid, cellname, value, iRow, iCol) {
-
             // 计算页脚数据
-            footerCalculate.call(this, rowid);
-
+            subtotalFooter.call(this, rowid);
+            totalFooter.call(this);
             // 编辑cell后保存时删除class
             $(this.rows[iRow]).find('td').eq(iCol).removeClass('edit-cell-item');
         }
     });
-
-    // 初始化行数据
-    for(var i=1; i <= 10; i++) {
-        t.jqGrid('addRowData', i, {});
-    }
 });
 
-function formStore() {
-
-    var params = {};
-
-    $.each(select2List, function(k, v) {
-        params[k] = v.el.select2('val');
-    });
-
-    var dataset = t.jqGrid('getRowsData');
-    if(dataset.v === true) {
-        if(dataset.data.length == 0) {
-            $.toastr('error', '商品不能为空。', '错误');
-            return;
-        } else {
-            params.stock_line = dataset.data;
-        }
-    } else {
-        return;
-    }
-
-    var query = $('#myform').serialize();
-    $.post('{{url("create")}}', query + '&' + $.param(params), function(res) {
-        if(res.status) {
-            $.messager.alert('提醒', res.data, function() {
-                location.href = res.url;
-            });
-        } else {
-            $.toastr('error', res.data);
-        }
-    });
-}
-
-function getPanelHeight() {
-    var list = $('#jqgrid-editor-container').position();
-    return top.iframeHeight - list.top - 150;
-}
-
-// 框架页面改变大小时会调用此方法
-function iframeResize() {
-    // 框架改变大小时设置Panel高度
-    t.jqGrid('setPanelHeight', getPanelHeight());
-    // resize jqgrid大小
-    t.jqGrid('resizeGrid');
-}
 </script>

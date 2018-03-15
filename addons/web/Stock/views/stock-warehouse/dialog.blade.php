@@ -55,17 +55,16 @@ ul.fancytree-container {
         {name: "product_spec", index: 'product.spec', label: '规格', width: 80, align: 'center'},
         {name: "category_name", index: 'product_category.name', label: '类别', width: 100, align: 'center'},
         {name: "product_barcode", index: 'product.barcode', label: '条码', width: 80, align: 'center'},
-        {name: "stock_quantity", index: '', label: '库存', width: 80, align: 'right'},
-        {name: "last_price", index: '', label: '上次进价', width: 60, align: 'right'},
-        {name: "product_price", index: 'product.price', label: '售价', width: 60, align: 'right'},
-        {name: "warehouse_name", index: 'warehouse.id', label: '默认仓库', width: 80, align: 'center'}
+        {name: "stock_quantity", index: '', label: '库存数量', width: 80, align: 'right'},
+        {name: "stock_cost", index: '', label: '成本', width: 60, align: 'right'},
+        {name: "warehouse_name", index: 'warehouse.id', label: '仓库', width: 80, align: 'center'}
     ];
 
     $table.jqGrid({
         caption: '',
         datatype: 'json',
         mtype: 'POST',
-        url: app.url('stock/product/dialog'),
+        url: app.url('stock/stock-warehouse/dialog'),
         colModel: model,
         rowNum: 500,
         multiselect: true,

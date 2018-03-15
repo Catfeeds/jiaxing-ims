@@ -468,8 +468,8 @@ class RequisitionController extends DefaultController
                 StockLine::insert($line);
             }
 
-            // 出库减少存货数量
-            Stock::decStock($model->id);
+            // 重建存货数据
+            Stock::rebuildStock($model);
 
             return $this->json('恭喜你，领料出库更新成功。', true);
         }
@@ -551,6 +551,10 @@ class RequisitionController extends DefaultController
                 $row->invalid_at = time();
                 $row->invalid_remark = $gets['remark'];
                 $row->save();
+
+                // 重建存货数据
+                Stock::rebuildStock($row);
+
                 return $this->json('恭喜你，领料出库作废成功。', true);
             } else {
                 return $this->json('很抱歉，领料出库不存在。');

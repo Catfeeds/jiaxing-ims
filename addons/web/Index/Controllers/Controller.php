@@ -99,6 +99,7 @@ class Controller extends BaseController
             $json['url']    = url_referer($status);
         }
         $json['data'] = $data;
+        Session::flash('message', $data);
         return response()->json($json);
     }
 

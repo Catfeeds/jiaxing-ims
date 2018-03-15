@@ -256,16 +256,13 @@
             dialogClass:'modal-md',
             destroy: true,
             onShow: function() {
-
                 var me = this;
-
-                if(options['url']) {
+                if (options['url']) {
                     $.get(options['url'], function(data) {
-                        //$('.modal-content').show();
                         me.html(data);
                     });
                 }
-                if(options['html']) {
+                if (options['html']) {
                     this.html(options['html']);
                 }
 

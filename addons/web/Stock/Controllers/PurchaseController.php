@@ -7,6 +7,7 @@ use Validator;
 
 use Aike\Web\Stock\Stock;
 use Aike\Web\Stock\StockLine;
+use Aike\Web\Stock\StockWarehouse;
 
 use Aike\Web\Index\Controllers\DefaultController;
 
@@ -86,7 +87,7 @@ class PurchaseController extends DefaultController
         $columns = [[
             'name'     => 'sn',
             'index'    => 'stock.sn',
-            'search'   => 'text',
+            'search'   => 'text2',
             'label'    => '单号',
             'width' => 160,
             'align'    => 'center',
@@ -578,8 +579,8 @@ class PurchaseController extends DefaultController
                 StockLine::insert($line);
             }
 
-            // 增加库存
-            Stock::incStock($purchase_line);
+            // 重建存货数据
+            Stock::rebuildStock($model);
 
             return $this->json('恭喜你，采购入库更新成功。', true);
         }
@@ -657,17 +658,19 @@ class PurchaseController extends DefaultController
 
         if (Request::method() == 'POST') {
             if ($row->id) {
-                // 减少库存
-                $dec = Stock::decStock($row->id);
-                if ($dec === true) {
-                    $row->status = 0;
-                    $row->invalid_at = time();
-                    $row->invalid_remark = $gets['remark'];
-                    $row->save();
-                    return $this->json('恭喜你，采购单据作废成功。', true);
-                } else {
-                    return $this->json($dec);
-                }
+                // 入库类型废除时检查存货数量
+                Stock::checkStock($row);
+
+                // 写入数据
+                $row->status = 0;
+                $row->invalid_at = time();
+                $row->invalid_remark = $gets['remark'];
+                $row->save();
+
+                // 重建存货数据
+                Stock::rebuildStock($row);
+
+                return $this->json('恭喜你，采购单据作废成功。', true);
             } else {
                 return $this->json('很抱歉，作废单据不存在。');
             }

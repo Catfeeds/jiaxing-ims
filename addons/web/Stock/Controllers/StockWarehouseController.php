@@ -18,33 +18,17 @@ class StockWarehouseController extends DefaultController
      */
     public function dialogAction()
     {
-        $gets = Input::get();
-
-        $abc = [
-            ['text','product.name','产品名称'],
-            ['text','product.spec','产品规格'],
-            ['text','product.barcode','产品条码'],
-            ['text','product.barcode','存货编码'],
-            ['status','product.status','产品状态'],
-            ['category','product.category_id','产品类别'],
-            ['text','product.id','产品ID'],
-        ];
-
-        if ($gets['type'] == 2) {
-            $abc[] = ['supplier','product.supplier_id','供应商'];
-        }
-
         $search = search_form([
-            'advanced'    => '',
-            'owner_id'    => 0,
-            'supplier_id' => 0,
-            'type'        => 1,
+            'advanced'    => 1,
             'page'        => 1,
+            'category_id' => 0,
             'sort'        => '',
             'order'       => '',
             'limit'       => '',
-        ], $abc);
-        
+        ], [
+            ['text2','product.name|product.spec|product.barcode|product.id','名称 / 规格 / 条码 / ID'],
+        ]);
+
         $query = $search['query'];
 
         if (Request::method() == 'POST') {
@@ -62,6 +46,11 @@ class StockWarehouseController extends DefaultController
                 $model->orderBy('product.sort', 'asc');
             }
 
+            if ($query['category_id']) {
+                $category = DB::table('product_category')->where('id', $query['category_id'])->first(['lft', 'rgt']);
+                $model->whereBetween('product_category.lft', [$category['lft'], $category['rgt']]);
+            }
+
             // 搜索条件
             foreach ($search['where'] as $where) {
                 if ($where['active']) {
@@ -69,24 +58,26 @@ class StockWarehouseController extends DefaultController
                 }
             }
 
-            $rows = $model->selectRaw("
-            stock_warehouse.*,
-            product.name as text,
-            product.name as product_name,
-            product.unit as product_unit,
-            product.spec as product_spec,
-            product.price as product_price,
-            product.barcode as product_barcode,
-            product_category.name as category_name,
-            warehouse.name as warehouse_name,
-            warehouse.id as warehouse_id
-            ")->paginate($query['limit']);
-
+            $model->selectRaw("
+                stock_warehouse.*,
+                product.name as text,
+                product.name as product_name,
+                product.unit as product_unit,
+                product.spec as product_spec,
+                product.price as product_price,
+                product.barcode as product_barcode,
+                product_category.name as category_name,
+                warehouse.name as warehouse_name,
+                warehouse.id as warehouse_id,
+                1 as quantity
+            ");
+            $rows = $model->paginate($query['limit']);
             return response()->json($rows);
         }
-        return $this->render(array(
+        $gets = Input::get();
+        return $this->render([
             'search' => $search,
             'gets'   => $gets,
-        ), 'jqgrid');
+        ]);
     }
 }

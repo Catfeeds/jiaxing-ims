@@ -34,6 +34,12 @@ class Dialog
             'field' => 'name',
             'url'   => 'stock/product/dialog',
         ],
+        'product_category' => [
+            'title' => '产品类别',
+            'table' => 'product_category',
+            'field' => 'name',
+            'url'   => 'stock/product-category/dialog',
+        ],
         'store' => [
             'title' => '门店',
             'table' => 'store',
@@ -98,7 +104,7 @@ class Dialog
         return join("\n", $html);
     }
 
-    public function select2($item, $name, $value = '', $multi = 0, $readonly = 0, $width = '153')
+    public function select2($item, $name, $value = '', $multi = 0, $readonly = 0, $width = 153)
     {
         $rows = [];
 

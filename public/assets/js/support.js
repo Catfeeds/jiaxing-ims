@@ -406,6 +406,81 @@ function viewDialog(name, url, options) {
 }
 
 /**
+ * 表单窗口
+ */
+var formDialogIndex = 0;
+function formDialog(options)
+{
+    if(options.id == undefined) {
+        options.id = 'form-dialog-' + formDialogIndex;
+        formDialogIndex ++;
+    }
+
+    var exist = $('#modal-' + options.id);
+    if(exist.length > 0) {
+        exist.dialog('show');
+    } else {
+        var defaults = {
+            title: 'formDialog',
+            buttons: [{
+                text: '保存',
+                class: 'btn-info',
+                click: function() {
+                    var me = this;
+                    var options = me.options;
+                    var action = $('#' + options.formId).attr('action');
+                    var formData = $('#' + options.formId).serializeArray();
+                    var query = {};
+                    $.each(formData, function(k, v) {
+                        query[v.name] = v.value;
+                    });
+
+                    // 提交前执行
+                    if (typeof options.onBeforeSend === 'function') {
+                        query = options.onBeforeSend.call(me, query);
+                        if (query === false) {
+                            return;
+                        }
+                    }
+   
+                    $.post(action, query, function(res) {
+    
+                        if (typeof options.onSuccess === 'function') {
+                            options.onSuccess.call(me, res);
+                        } else {
+                            if(res.status) {
+                                if(res.data == 'reload') {
+                                    window.location.reload();
+                                } else {
+                                    $.toastr('success', res.data, '提醒');
+                                    $(me).dialog("close");
+                                }
+                            } else {
+                                $.toastr('error', res.data, '提醒');
+                            }
+                        }
+    
+                    },'json');
+                }
+            },{
+                text: '取消',
+                class: 'btn-default',
+                click: function() {
+                    var me = this;
+                    if (typeof error === 'function') {
+                        error.call(me, res); 
+                    } else {
+                        $(me).dialog("close");
+                    }
+                }
+            }]
+        };
+        var settings = $.extend({}, defaults, options);
+        $('#' + options.id).__dialog(settings);
+    }
+}
+
+/**
  * 快捷表单窗口
  */
 function quickForm(table, title, url, size)

@@ -361,37 +361,21 @@ class ProductController extends DefaultController
      */
     public function dialogAction()
     {
-        $gets = Input::get();
-
-        $abc = [
-            ['text','product.name','产品名称'],
-            ['text','product.spec','产品规格'],
-            ['text','product.barcode','产品条码'],
-            ['text','product.barcode','存货编码'],
-            ['status','product.status','产品状态'],
-            ['category','product.category_id','产品类别'],
-            ['text','product.id','产品ID'],
-        ];
-
-        if ($gets['type'] == 2) {
-            $abc[] = ['supplier','product.supplier_id','供应商'];
-        }
-
         $search = search_form([
-            'advanced'    => '',
-            'owner_id'    => 0,
-            'supplier_id' => 0,
-            'type'        => 1,
+            'advanced'    => 1,
             'page'        => 1,
+            'category_id' => 0,
             'sort'        => '',
             'order'       => '',
             'limit'       => '',
-        ], $abc);
-        
+        ], [
+            ['text2','product.name|product.spec|product.barcode|product.id','名称 / 规格 / 条码 / ID'],
+        ]);
+
         $query = $search['query'];
 
         if (Request::method() == 'POST') {
-            $model = DB::table('product')
+            $model = Product::with('stockWarehouses')
             ->leftJoin('product_category', 'product_category.id', '=', 'product.category_id')
             ->leftJoin('warehouse', 'warehouse.id', '=', 'product.warehouse_id')
             ->where('product.type', 1)
@@ -405,6 +389,11 @@ class ProductController extends DefaultController
                 $model->orderBy('product.sort', 'asc');
             }
 
+            if ($query['category_id']) {
+                $category = DB::table('product_category')->where('id', $query['category_id'])->first(['lft', 'rgt']);
+                $model->whereBetween('product_category.lft', [$category['lft'], $category['rgt']]);
+            }
+
             // 搜索条件
             foreach ($search['where'] as $where) {
                 if ($where['active']) {
@@ -412,27 +401,35 @@ class ProductController extends DefaultController
                 }
             }
 
-            $rows = $model->selectRaw("
-            product.*,
-            product.name as text,
-            product_category.name as category_name,
-            warehouse.name as warehouse_name,
-            warehouse.id as warehouse_id
-            ")->paginate($query['limit']);
+            $model->selectRaw("
+                product.id as id,
+                product.name as text,
+                product.name as product_name,
+                product.unit as product_unit,
+                product.spec as product_spec,
+                product.price as product_price,
+                product.barcode as product_barcode,
+                product_category.name as category_name,
+                warehouse.name as warehouse_name,
+                warehouse.id as warehouse_id,
+                1 as quantity
+            ");
 
-            $lasts = DB::select('select * from stock_line where id in (select max(id) from stock_line group by product_id) order by stock_line.id desc');
-            $lasts = array_by($lasts, 'product_id');
+            $rows = $model->paginate($query['limit']);
 
-            $rows->transform(function ($row) use ($lasts) {
-                $row['last_price'] = $lasts[$row['id']]['price'];
-                return $row;
+            $rows->transform(function ($item, $v) {
+                $item['last_price'] = $item->stockWarehouses[0]->last_price;
+                $item['stock_quantity'] = $item->stockWarehouses->sum('stock_quantity');
+                return $item;
             });
+
             return response()->json($rows);
         }
-        return $this->render(array(
+        $gets = Input::get();
+        return $this->render([
             'search' => $search,
             'gets'   => $gets,
-        ), 'jqgrid');
+        ]);
     }
 
     // 删除产品

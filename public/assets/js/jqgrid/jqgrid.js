@@ -155,7 +155,6 @@ $.extend($.jgrid.defaults, {
             e.stopPropagation();
             actionLink($(this).data());
         });
-
     },
     gridComplete: function() {
         $(this).jqGrid('setColsWidth');
@@ -360,7 +359,7 @@ $.jgrid.celledit.dialog = function(config) {
 
         var dialog = config.dialog;
         dialog.params['jqgrid'] = pid;
-
+        
         // 设置缓存状态
         var cache = config.suggest['cache'] == undefined ? true : config.suggest['cache'];
 
@@ -385,6 +384,7 @@ $.jgrid.celledit.dialog = function(config) {
                 name: options.name,
                 dialog: {
                     title: dialog.title,
+                    dialogClass: dialog.dialogClass || 'modal-sm',
                     url: app.url(dialog.url, dialog.params),
                     mapField: mapField,
                 },
@@ -392,17 +392,34 @@ $.jgrid.celledit.dialog = function(config) {
                     items: p.editCombo[name],
                     selected: selected
                 },
-                select: function(item) {
-                    if(item) {
-                        // 添加已编辑
-                        $me.find('#' + rowid).addClass('edited');
+                select: function(item, rid, ir, ic) {
+                    if (item) {
+
+                        rid = rid || rowid;
+                        ir  = ir  || p.iRow;
+                        ic  = ic  || p.iCol;
+
                         // 关闭编辑框
-						$me.jqGrid('saveCell', p.iRow, p.iCol);
+						$me.jqGrid('saveCell', ir, ic);
+
+                        if ($.isFunction(config.beforeSelect)) {
+                            var v = config.beforeSelect.call($elem, item);
+                            if (v === false) {
+                                return false;
+                            }
+                            if (v) {
+                                item = v;
+                            }
+                        }
+                        // 添加已编辑
+                        $me.find('#' + rid).addClass('edited');
 						// 循环映射字段
                         $.each(mapField, function(k, field) {
-                            $me.jqGrid('setCell', rowid, k, item[field]);
+                            $me.jqGrid('setCell', rid, k, item[field]);
                         });
+                        return true;
                     }
+                    return false;
                 }
             });
         }
@@ -426,7 +443,6 @@ $.jgrid.celledit.dropdown = function(config) {
             $elem = $(elem),
             rowid = options.rowId,
             name  = options.name;
-            //rows  = p.editCombo[name] || [];
 
         // 编辑器打开后全选文本
         $elem.select();
@@ -692,7 +708,64 @@ $.jgrid.extend({
         }
 
 		return {data: ret, v: true};
-	},
+    },
+    getRows: function(callback) {
+        var ret = [], errors = [];
+		this.each(function() {
+			var $t = this, nm;
+
+            // 保存前关闭打开的编辑器
+            $(this).jqGrid("saveCell", $t.p.iRow, $t.p.iCol);
+
+			if (!$t.grid || $t.p.cellEdit !== true ) { return; }
+
+			$($t.rows).each(function(j) {
+
+                // 只显示标示了已编辑的行
+                if($(this).hasClass('jqgrow')) {
+
+                    var res = {};
+
+                    $('td', this).each(function(i) {
+
+                        var cm = $t.p.colModel[i],
+                            nm = cm.name;
+
+                        if (nm !== 'op' && nm !== 'rn' && nm !== 'cb' && nm !== 'subgrid') {
+                            try {
+                                
+                                res[nm] = $.unformat.call($t,this,{rowId:$t.rows[j].id,colModel:$t.p.colModel[i]},i);
+                                
+                                if(cm.formatter == 'dropdown') {
+                                    res[nm] = $t.p.editComboCache[$t.rows[j].id + '_' + nm];
+                                }
+
+                            } catch (e) {
+                                res[nm] = $.jgrid.htmlDecode($(this).html());
+                            }
+                            
+                            // 校验数据信息
+                            var v = $.jgrid.checkValues.call($t, res[nm], -1, cm.rules, cm.label);
+                            if(v[0] === false) {
+                                v[3] = j;
+                                v[4] = i;
+                                errors.push(v);
+                            }
+                        }
+                    });
+                    // 检查特定字段是否大于0
+                    if (callback) {
+                        if(res[callback] > 0) {
+                            ret.push(res);
+                        }
+                    } else {
+                        ret.push(res);
+                    }
+                }
+			});
+		});
+		return {data: ret, errors: errors};
+    },
     // 验证不通过的行跳过行数据
     getDatas: function() {
 		var ret = [], cv = [];
@@ -744,14 +817,11 @@ $.jgrid.extend({
 
                         }
                     });
-
                     // 验证失败跳出循环
                     if(cv.length) {
                         return true;
                     }
-                    
                     ret.push(res);
-
                 }
 			});
 		});

@@ -158,13 +158,18 @@ class ProductCategoryController extends DefaultController
         $gets = Input::get();
 
         if (Request::method() == 'POST') {
-            $maps = ProductCategory::where('type', 1)->orderBy('lft', 'asc')->get()->toNested();
-            $rows = [];
-            foreach ($maps as $row) {
-                $row['text'] = $row['layer_space'].$row['name'];
-                $rows[] = $row;
+            $model = ProductCategory::where('type', 1)->orderBy('lft', 'asc')->get(['*', 'name as title']);
+            if ($gets['fancytree'] == true) {
+                $json = array_tree($model->toArray(), 'title');
+            } else {
+                $res = $model->toNested();
+                $rows = [];
+                foreach ($res as $v) {
+                    $v['text'] = $v['layer_space'].$v['name'];
+                    $rows[] = $v;
+                }
+                $json = ['total' => count($rows), 'data' => $rows];
             }
-            $json = ['total' => count($rows), 'data' => $rows];
             return response()->json($json);
         }
 

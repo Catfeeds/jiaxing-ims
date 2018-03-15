@@ -1,4 +1,4 @@
-<?php namespace Aike\Web\Product;
+<?php namespace Aike\Web\Stock;
 
 use Aike\Web\Index\BaseModel;
 

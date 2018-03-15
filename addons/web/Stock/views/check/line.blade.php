@@ -31,7 +31,7 @@
 
 <script>
 var routes = {
-    index: 'stock/purchase-return/line',
+    index: 'stock/check/line',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};

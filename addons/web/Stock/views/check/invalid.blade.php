@@ -32,9 +32,9 @@
 
 <script>
 var routes = {
-    index: 'stock/purchase-return/invalid',
-    delete: 'stock/purchase-return/delete',
-    show: 'stock/purchase-return/show',
+    index: 'stock/check/invalid',
+    delete: 'stock/check/delete',
+    show: 'stock/check/show',
 };
 var $table = null;
 var params = paramsSimple = {{json_encode($search['query'])}};

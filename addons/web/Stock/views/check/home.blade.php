@@ -34,7 +34,7 @@
                 <i class="fa fa-3x fa-sun-o"></i>
             </div>
             <div class="todo-text">
-                <div class="text-md" style="color:#2c83e4;">本月报损金额</div>
+                <div class="text-md" style="color:#2c83e4;">本月盘点金额</div>
                 <div class="px text-base">{{$day}}元</div>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 <i class="fa fa-3x fa-calendar"></i>
             </div>
             <div class="todo-text">
-                <div class="text-md" style="color:#fd875a;">本年报损金额</div>
+                <div class="text-md" style="color:#fd875a;">本年盘点金额</div>
                 <div class="px text-base">{{$month}}元</div>
             </div>
         </div>
@@ -56,7 +56,7 @@
                 <i class="fa fa-3x fa-database"></i>
             </div>
             <div class="todo-text">
-                <div class="text-md" style="color:#27c24c;">累计报损金额</div>
+                <div class="text-md" style="color:#27c24c;">累计盘点金额</div>
                 <div class="px text-base">{{$all}}元</div>
             </div>
         </div>

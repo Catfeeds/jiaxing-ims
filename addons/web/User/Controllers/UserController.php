@@ -118,7 +118,7 @@ class UserController extends DefaultController
                 'department_id' => 'required',
                 'role_id'       => 'required',
                 'password'      => 'min:6',
-                'post'          => 'required',
+                'position_id'   => 'required',
             ], [
                 'required'      => ':attribute不能为空',
                 'min'           => ':attribute不能小于6位',
@@ -128,12 +128,12 @@ class UserController extends DefaultController
                 'name'          => '姓名',
                 'department_id' => '部门',
                 'role_id'       => '角色',
-                'post'          => '职位',
+                'position_id'   => '职位',
                 'password'      => '密码',
             ]);
             
             if ($v->fails()) {
-                return $this->back()->withErrors($v)->withInput();
+                return $this->json($v->errors()->all());
             }
             
             $model->login = $gets['login'];
@@ -144,7 +144,8 @@ class UserController extends DefaultController
             }
 
             $model->fill($gets)->save();
-            return $this->success('index', '恭喜您，操作成功。');
+
+            return $this->json('恭喜您，操作成功。', 'index');
         }
 
         $row = User::findOrNew($gets['id']);

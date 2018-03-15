@@ -125,11 +125,8 @@ $(function() {
         },
         // 进入编辑前调用
         beforeEditCell: function(rowid, cellname, value, iRow, iCol) {
-
             // 编辑前插入class
-            $("#" + rowid).find('td').eq(iCol).addClass('edit-cell-item');
-            var row = t.jqGrid('getRowData', rowid);
-
+            $(this.rows[iRow]).find('td').eq(iCol).addClass('edit-cell-item');
             if(cellname == 'product_name') {
                 t.setColProp(cellname, {
                     editoptions: {
@@ -147,15 +144,16 @@ $(function() {
                                 warehouse_id:'warehouse_id',
                                 product_id:'product_id',
                                 price:'product_price',
-                                quantity: 1,
+                                quantity: 'quantity',
                             },
                             suggest: {
-                                url: 'stock/stock-warehouse/dialog',
+                                url: 'stock/product/dialog',
                                 params: {order:'asc', limit:1000}
                             },
                             dialog: {
                                 title: '商品管理',
-                                url: 'stock/stock-warehouse/dialog',
+                                dialogClass: 'modal-lg',
+                                url: 'stock/product/dialog',
                                 params: {}
                             }
                         })
@@ -189,14 +187,14 @@ $(function() {
         // 保存服务器时调用
         afterRestoreCell: function(rowid, value, iRow, iCol) {
             // 编辑cell后保存时删除class
-            $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
+            $(this.rows[iRow]).find('td').eq(iCol).removeClass('edit-cell-item');
         },
         // 保存在本地的时候调用
         afterSaveCell: function(rowid, cellname, value, iRow, iCol) {
             // 计算页脚数据
             footerCalculate.call(this, rowid);
             // 编辑cell后保存时删除class
-            $("#" + rowid).find('td').eq(iCol).removeClass('edit-cell-item');
+            $(this.rows[iRow]).find('td').eq(iCol).removeClass('edit-cell-item');
         }
     });
 
@@ -227,8 +225,8 @@ function totalSum(money, type) {
         $('#arrear_money').val(0);
     }
     if(type == 'pay') {
-        var total       = $('#total_money').val();
-        var discount  = $('#discount_money').val();
+        var total    = $('#total_money').val();
+        var discount = $('#discount_money').val();
         $('#arrear_money').val(total - money - discount);
     }
     if(type == 'discount') {

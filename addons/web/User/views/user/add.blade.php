@@ -52,11 +52,11 @@
     <tr>
         <td align="right">职位</td>
         <td align="left">
-            <select class="form-control input-inline input-sm" name="post" id="post">
+            <select class="form-control input-inline input-sm" name="position_id" id="position_id">
                 <option value=""> - </option>
                 @if(count($positions))
                 @foreach($positions as $position)
-                    <option value="{{$position->id}}" @if($row->post ==$position->id) selected @endif>{{$position->name}}</option>
+                    <option value="{{$position->id}}" @if($row->position_id ==$position->id) selected @endif>{{$position->name}}</option>
                 @endforeach
                 @endif
             </select>
@@ -143,6 +143,7 @@
 </form>
 
 <script type="text/javascript">
+ajaxSubmit('#myform');
 function getSecret() {
     $.messager.confirm('安全密钥', '确定要更新安全密钥。', function() {
         $.post("{{url('secret')}}",{id:'{{$row->id}}'}, function(res) {
