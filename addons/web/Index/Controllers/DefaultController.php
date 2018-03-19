@@ -1,6 +1,5 @@
 <?php namespace Aike\Web\Index\Controllers;
 
-use Aike\Web\Index\Access;
 use Aike\Web\Index\Menu;
 use View;
 
@@ -10,7 +9,7 @@ class DefaultController extends Controller
     {
         parent::__construct();
 
-        Access::setPermissions($this->permission);
+        Menu::setPermissions($this->permission);
 
         // 登录认证和RBAC检查
         $this->middleware('auth');
@@ -18,7 +17,7 @@ class DefaultController extends Controller
         // 获取登录认证数据
         $this->middleware(function ($request, $next) {
             $this->user = $request->user();
-            $this->access = Access::getNowRoleAssets();
+            $this->access = Menu::getNowRoleAssets();
             $menus = Menu::getItems();
             View::share([
                 'menus'  => $menus,

@@ -4,11 +4,6 @@ return [
     "order" => 255,
     "version" => "1.0",
     "description" => "系统模块",
-    "icons" => [
-        16 => "images/16.png",
-        48 => "images/48.png",
-        128 => "images/128.png"
-    ],
     "access" => [
         1 => "本人",
         2 => "本人和下属",

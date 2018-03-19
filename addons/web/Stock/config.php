@@ -4,11 +4,6 @@ return [
     "order" => 41,
     "version" => "1.0",
     "description" => "产品列表,产品类别,库存类型,仓库类别,库存管理,仓库列表。",
-    "icons" => [
-        16 => "images/16.png",
-        48 => "images/48.png",
-        128 => "images/128.png"
-    ],
     "listens" => [
         //['supplier_price', 'Aike\Web\Supplier\Hooks\Price'],
         //['supplier_price_data', 'Aike\Web\Supplier\Hooks\PriceData'],

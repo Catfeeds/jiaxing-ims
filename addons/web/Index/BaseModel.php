@@ -42,60 +42,6 @@ class BaseModel extends Eloquent
         return [];
     }
 
-    public function scopeWithAt($query, $relation, array $columns)
-    {
-        return $query->with([$relation => function ($query) use ($columns) {
-            $query->select(array_merge(['id'], $columns));
-        }]);
-    }
-
-    public function step()
-    {
-        return $this->belongsTo('Aike\Web\Model\Step', 'step_number', 'number');
-    }
-
-    public function scopeGetStep($query, $number = 1)
-    {
-        $table = $this->table;
-        return \Aike\Web\Model\Model::leftJoin('model_step', 'model_step.model_id', '=', 'model.id')
-        ->where('model.table', $table)
-        ->where('model_step.number', $number)
-        ->select('model_step.*')
-        ->first();
-    }
-
-    public function scopeGetSteps($query)
-    {
-        $table = $this->table;
-        return \Aike\Web\Model\Model::leftJoin('model_step', 'model_step.model_id', '=', 'model.id')
-        ->where('model.table', $table)
-        ->select('model_step.*')
-        ->orderBy('model_step.number', 'asc')
-        ->get();
-    }
-    
-    public function scopeStepAt($query)
-    {
-        $table = $this->table;
-
-        // 过滤草稿状态
-        $query->whereRaw('('.$table.'.created_by=? and '.$table.'.step_number=1 or '.$table.'.step_number>1)', [auth()->id()]);
-
-        return $query->with(['step' => function ($q) use ($table) {
-            $q->LeftJoin('model', 'model.id', '=', 'model_step.model_id')
-            ->where('model.table', $table)
-            ->select('model_step.*');
-        }]);
-    }
-
-    /**
-     * 查询 Dialog 字段显示的值，其他模型可复写此方法
-     */
-    public function scopeDialog($query, $value, $column)
-    {
-        return $query->whereIn('id', $value)->get(['id', $column]);
-    }
-
     /**
      * 取得所有层级
      *
@@ -111,16 +57,6 @@ class BaseModel extends Eloquent
         ->whereRaw('node.lft BETWEEN parent.lft AND parent.rgt')
         ->groupBy('node.id')
         ->orderBy('node.lft', 'asc');
-
-        /*
-        $select = 'node.'.str_replace(',', ',node.', $select);
-        $rows = DB::select(
-            'SELECT '.$select.',(COUNT(parent.id)-1) level FROM '.$table.' node, '.$table.' parent
-            WHERE node.lft BETWEEN parent.lft AND parent.rgt
-            GROUP BY node.id
-            ORDER BY node.lft ASC'
-        );
-        */
 
         $result = array();
 
@@ -151,20 +87,6 @@ class BaseModel extends Eloquent
         ->get();
 
         return $rows;
-        /*
-        $on = array(
-            'node.lft BETWEEN parent.lft AND parent.rgt',
-            'parent.rgt BETWEEN node.lft AND node.rgt'
-        );
-        return \DB::select(
-            'SELECT node.* FROM '.$table.' node, '.$table.' parent
-            WHERE '.$on[$type].'
-            AND parent.id = ?
-            GROUP BY node.id
-            ORDER BY node.lft ASC',
-            array($id)
-        );
-        */
     }
 
     public function scopeToTree($query, $text = 'name', $selected = 0, $state = 'closed')
@@ -177,7 +99,7 @@ class BaseModel extends Eloquent
         // 格式化的树
         $tree = [];
 
-        //临时扁平数据
+        // 临时扁平数据
         $map = [];
 
         foreach ($nodes as $node) {
@@ -204,33 +126,10 @@ class BaseModel extends Eloquent
     public function scopeToChild($query, array $select = array('*'))
     {
         $items = $query->get($select)->keyBy('id')->toArray();
-        /*$parent = [];
-        foreach ($items as &$item) {
-            $id = $item['id'];
-            $item['child'][$id] = $id;
-            $parent[$item['parent_id']][$id] = $id;
-        }
-        */
         $id = 0;
         foreach ($items as &$item) {
             $path = explode(',', $item['path']);
             $item['parent'] = $path;
-
-            //$items[$parent_id]['a'] = array_merge($path, (array)$items[$parent_id]['a']);
-
-            //print_r($path);
-
-            //$child_id  = $parent[$item['id']] ? $parent[$item['id']] : [$item['id']];
-            //$parent_id = $items[$item['parent_id']]['child'] ? $items[$item['parent_id']]['child'] : [$item['id']];
-            //$items[$item['parent_id']]['child'] = array_merge($parent_id, $child_id);
-            /*
-            if ($item['parent_id'] == 0) {
-                $id = $item['id'];
-                $item['child'] = [$id];
-            } else {
-                $items[$id]['child'][] = $item['id'];
-            }
-            */
         }
         return $items;
     }
@@ -247,18 +146,6 @@ class BaseModel extends Eloquent
         ->orderBy('node.lft', 'asc')
         ->select(['parent.*'])
         ->get()->keyBy('id');
-        /*
-        $maps = DB::select('
-            SELECT parent.* FROM '.$table.' node, '.$table.' parent
-            WHERE node.lft BETWEEN parent.lft AND parent.rgt
-            AND node.id = ?
-            ORDER BY node.lft', [$id]);
-
-        $rows = [];
-        foreach ($maps as $map) {
-            $rows[$map['id']] = $map;
-        }
-        */
         return $rows;
     }
 

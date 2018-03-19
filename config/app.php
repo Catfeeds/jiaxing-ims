@@ -104,7 +104,7 @@ return [
     |
     */
 
-    'key' => env('APP_KEY', 'EEP27jkqQaiD43h0tUVxFlgXXQb7ylDx'),
+    'key' => env('APP_KEY', ''),
 
     'cipher' => 'AES-256-CBC',
 
@@ -177,9 +177,6 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
-        Collective\Html\HtmlServiceProvider::class,
-
     ],
 
     /*
@@ -232,9 +229,6 @@ return [
         'Input' => Illuminate\Support\Facades\Input::class,
 
         'Paginator' => App\Pagination\Paginator::class,
-        
-        'Form' => Collective\Html\FormFacade::class,
-        'HTML' => Collective\Html\HtmlFacade::class,
     ],
 
 ];

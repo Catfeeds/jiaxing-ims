@@ -86,7 +86,7 @@ class Builder extends BaseBuilder
     
             if (isset($columns[$id])) {
                 $values[$id] = isset($values[$id]) ? $values[$id] : (int)Auth::id();
-                $values[$by] = isset($values[$by]) ? $values[$by] : Auth::user()->nickname;
+                $values[$by] = isset($values[$by]) ? $values[$by] : Auth::user()->name;
             } else {
                 if (isset($columns[$by])) {
                     $values[$by] = isset($values[$by]) ? $values[$by] : (int)Auth::id();

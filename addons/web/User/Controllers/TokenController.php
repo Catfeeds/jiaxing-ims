@@ -8,7 +8,7 @@ use Request;
 use JWT;
 
 use Aike\Web\User\User;
-use Aike\Web\Index\Access;
+use Aike\Web\Index\Menu;
 
 use Aike\Web\Index\Controllers\Controller;
 
@@ -73,7 +73,7 @@ class TokenController extends Controller
             // 保存用户表数据
             $user->save();
 
-            $assets = Access::getRoleAssets($user->role_id);
+            $assets = Menu::getRoleAssets($user->role_id);
             return response()->json([
                 'token'   => $this->createToken($user->id),
                 'access'  => $assets,

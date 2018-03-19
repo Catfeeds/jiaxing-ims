@@ -36,7 +36,6 @@ mix.combine([
     'public/assets/js/select2.js',
     'public/assets/js/search.js',
     'public/assets/js/dialog.js',
-    'public/assets/js/listview.js',
     'public/assets/js/flow.js',
     'public/assets/js/support.js',
 

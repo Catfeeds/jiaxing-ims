@@ -4,11 +4,6 @@ return [
     "order" => 254,
     "version" => "1.0",
     "description" => "账户、职位、角色权限、部门管理。",
-    "icons" => [
-        16 => "images/16.png",
-        48 => "images/48.png",
-        128 => "images/128.png"
-    ],
     "access" => [
         1 => "本人",
         2 => "本人和下属",

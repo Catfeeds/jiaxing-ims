@@ -10,9 +10,8 @@ class IndexController extends DefaultController
     /**
       * 设置可直接访问的方法
       */
-    public $permission = ['dashboard','help','index','home','profile', 'unsupportedBrowser'];
+    public $permission = ['dashboard','help','index','unsupportedBrowser','welcome'];
 
-    // 电脑版
     public function indexAction(Request $request)
     {
         $url = Input::get('i', 'index/index/dashboard');
@@ -22,7 +21,6 @@ class IndexController extends DefaultController
         ]);
     }
     
-    // 电脑版桌面
     public function dashboardAction(Request $request)
     {
         $widgets = DB::table('widget')
@@ -32,15 +30,6 @@ class IndexController extends DefaultController
         ->get();
 
         $panel = Input::get('panel');
-
-        $article_count = DB::table('article')
-        ->permission('receive_id')
-        ->whereNotExists(function ($q) {
-            $q->selectRaw('1')
-            ->from('article_reader')
-            ->whereRaw('article_reader.article_id = article.id')
-            ->where('article_reader.created_by', auth()->id());
-        })->count('id');
 
         $panels = [
             'communicate' => [
@@ -80,6 +69,11 @@ class IndexController extends DefaultController
         ]);
     }
     
+    public function welcomeAction()
+    {
+        return $this->render();
+    }
+
     // 首页登录指南页面
     public function helpAction()
     {

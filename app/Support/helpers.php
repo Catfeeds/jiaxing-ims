@@ -1,6 +1,6 @@
 <?php
 
-// 高级搜索生成 where 条件
+// 搜索生成 where 条件
 function search_condition($query)
 {
     $search = $query['search'];
@@ -933,15 +933,6 @@ function option($key, $value = '')
 }
 
 /**
- * 获取省市县
- */
-function get_region($id)
-{
-    $row = DB::table('region')->where('id', $id)->first();
-    return $row['name'];
-}
-
-/**
  * 获取单用户数据
  */
 function get_user($id = 0, $field = '', $letter = true)
@@ -1127,7 +1118,7 @@ function authorize_current_assets()
     static $authorize = [];
 
     if (empty($authorize)) {
-        $access = Aike\Web\Index\Access::getNowRoleAssets();
+        $access = Aike\Web\Index\Menu::getNowRoleAssets();
         foreach ($access as $k => $v) {
             $authorize[$k]['users']  = Aike\Web\User\User::authoriseAccess($k);
             $authorize[$k]['access'] = $v;

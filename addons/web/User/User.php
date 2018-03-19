@@ -14,7 +14,7 @@ use Session;
 use DB;
 
 use Aike\Web\Index\BaseModel;
-use Aike\Web\Index\Access;
+use Aike\Web\Index\Menu;
 
 class User extends BaseModel implements
     AuthenticatableContract,
@@ -57,11 +57,6 @@ class User extends BaseModel implements
         return $this->belongsTo('Aike\Web\User\UserPosition', 'post');
     }
 
-    public function tasks()
-    {
-        return $this->belongsToMany('Aike\Web\Project\Task');
-    }
-
     /**
      * 验证权限
      */
@@ -79,7 +74,7 @@ class User extends BaseModel implements
             }
         }
 
-        return Access::check(Auth::user()->role_id, $action, $asset_name);
+        return Menu::check(Auth::user()->role_id, $action, $asset_name);
     }
 
     /**

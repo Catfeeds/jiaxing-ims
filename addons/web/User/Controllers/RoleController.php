@@ -11,7 +11,7 @@ use Module;
 
 use Aike\Web\User\User;
 use Aike\Web\User\Role;
-use Aike\Web\Index\Access;
+use Aike\Web\Index\Menu;
 
 use Aike\Web\Index\Controllers\DefaultController;
 
@@ -142,7 +142,7 @@ class RoleController extends DefaultController
             $clone_id = $gets['role_id'];
         }
 
-        $assets = Access::getRoleAssets($clone_id);
+        $assets = Menu::getRoleAssets($clone_id);
 
         $modules = Module::allWithDetails();
         $modules = array_sort($modules, function ($value) {
