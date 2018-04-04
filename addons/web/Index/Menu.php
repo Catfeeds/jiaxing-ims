@@ -84,6 +84,12 @@ class Menu extends BaseModel
             ['name'=>'邮件设置', 'url' => 'setting/mail/index'],
             ['name'=>'部件设置', 'url' => 'setting/widget/index'],
         ];
+        $tabs['setting.print'] = [
+            ['name'=>'采购单', 'i' => ['node'], 'url' => 'setting/print/index', 'query' => ['node' => 'stock.purchase', 'size' => 'a4']],
+            ['name'=>'领料单', 'i' => ['node'], 'url' => 'setting/print/index', 'query' => ['node' => 'stock.requisition', 'size' => 'a4']],
+            ['name'=>'报损单', 'i' => ['node'], 'url' => 'setting/print/index', 'query' => ['node' => 'stock.loss', 'size' => 'a4']],
+            ['name'=>'退货单', 'i' => ['node'], 'url' => 'setting/print/index', 'query' => ['node' => 'stock.purchase-return', 'size' => 'a4']],
+        ];
         $tabs['user'] = [
             ['name'=>'用户', 'url' => 'user/user/index'],
             ['name'=>'角色', 'url' => 'user/role/index'],
@@ -133,6 +139,7 @@ class Menu extends BaseModel
             ['id' =>'setting_setting', 'parent' => 'setting', 'name' => '系统设置', 'url' => 'setting/setting/index'],
             ['id' =>'setting_user', 'parent' => 'setting', 'name' => '组织架构', 'url' => 'user/user/index'],
             ['id' =>'stock_service', 'parent' => 'setting', 'name' => '服务管理', 'url' => 'stock/service/index'],
+            ['id' =>'setting_print', 'parent' => 'setting', 'name' => '打印模板', 'url' => 'setting/print/index'],
             ['id' =>'setting_option', 'parent' => 'setting', 'name' => '科目设置', 'url' => 'setting/option/index'],
         ];
 

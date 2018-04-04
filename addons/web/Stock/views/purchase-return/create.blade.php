@@ -179,7 +179,7 @@ function formStore() {
     var params = {};
 
     $.each(select2List, function(k, v) {
-        params[k] = v.select2('val');
+        params[k] = v.el.select2('val');
     });
 
     var dataset = t.jqGrid('getRowsData');

@@ -11,6 +11,9 @@ let mix = require('laravel-mix');
  |
  */
 
+mix.react('resources/assets/js/app.js', 'public/assets/dist/bundle.min.js');
+//.sass('resources/assets/sass/app.scss', 'public/css');
+
 mix.combine([
     'public/assets/vendor/jquery.js',
     'public/assets/vendor/jquery-ui.min.js',

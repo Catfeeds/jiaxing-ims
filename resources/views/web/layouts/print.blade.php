@@ -131,6 +131,7 @@ body {
  }
  .panel-form-show {
     border: 1px solid #333;
+    
     border-top: 0;
     margin: 0;
  }

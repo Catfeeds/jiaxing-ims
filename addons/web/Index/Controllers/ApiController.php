@@ -8,6 +8,7 @@ class ApiController extends Controller
 {
     public function helloAction()
     {
+        /*
         $agentid = 1000035;
         $url = 'http://www.shenghuafood.com/article/article/view?id=1336&agentid='.$agentid;
         //$url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww42727b1e44abc7fa&redirect_uri='.$u.'&response_type=code&scope=snsapi_privateinfo&agentid='.$agentid.'&state='.$agentid.'#wechat_redirect';
@@ -25,16 +26,76 @@ class ApiController extends Controller
                     "url"         => $url,
                     "picurl"      => ""
                 ))
-            )/*
+            )
             'text'    => array(
                 "content"=>"各部门及同事：\n".
                 "为更好的服务好再来大厦，满足大厦入驻员工的班车需求，现对部分班车路线及时刻做相应调整，自2016年9月20日零时生效。详情点击\n<a href=\"http://banche.hoolilai.com\">http://banche.hoolilai.com</a>"
-            )*/
+            )
         );
-                
+
+        */
+
+        $data = ['a' => '我是谁'];
+
+        $data['abc_list'] = [
+            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
+            ['a' => 'a2', 'b' => 'b2'],
+            ['a' => 'a3', 'b' => 'b3'],
+            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
+            ['a' => 'a2', 'b' => 'b2'],
+            ['a' => 'a3', 'b' => 'b3'],
+            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
+            ['a' => 'a2', 'b' => 'b2'],
+            ['a' => 'a3', 'b' => 'b3'],
+            ['a' => 'a1', 'b' => 'b1', 'c' => 'c1'],
+            ['a' => 'a2', 'b' => 'b2'],
+            ['a' => 'a3', 'b' => 'b3'],
+            ['a' => 'a4', 'b' => 'b4']
+        ];
+
+        $data['bbc_list1'] = [
+            ['a' => 'a11', 'b' => 'b11'],
+            ['a' => 'a22', 'b' => 'b22']
+        ];
+
+        //printExcel('1.xlsx', $data);
+
+        $views = [
+            // 默认模板渲染规则 1 解析为小写+下划线 2 全部转换小写
+            'auto_rule'   => 1,
+            // 视图基础目录（集中式）
+            'view_base'   => '',
+            // 模板起始路径
+            'view_path'   => '',
+            // 模板文件后缀
+            'view_suffix' => 'html',
+            // 模板文件名分隔符
+            'view_depr'   => DIRECTORY_SEPARATOR,
+            // 是否开启模板编译缓存,设为false则每次都会重新编译
+            'tpl_cache'   => true,
+        ];
+
+        $abc = new \Template\Template($views);
+
+        $data['list'] = [
+            ['name' => '21212', 'id' => 'fsdfsdf'],
+            ['name' => '21212', 'id' => 'fsdfsdf'],
+            ['name' => '21212', 'id' => 'fsdfsdf'],
+            ['name' => '21212', 'id' => 'fsdfsdf'],
+            ['name' => '21212', 'id' => 'fsdfsdf'],
+            ['name' => '21212', 'id' => 'fsdfsdf'],
+        ];
+
+        $e = $abc->fetch('abc', $data);
+        print_r($e);
+
+        exit;
+
+        //$objWriter->save($savePath); //保存为html文件
+        /*
         $api = new \App\Wechat\Work\App($agentid);
-        
         var_dump($api->sendMsgToUser($msg));
+        */
 
         //$abc = Yunpian::send('15182223008', '您的验证码是5967');
         //print_r($abc);

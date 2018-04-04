@@ -199,10 +199,15 @@ class PurchaseController extends DefaultController
         ],[
             'name'  => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'show'        => '明细',
-                'invalidEdit' => '作废'
-            ],
+            'formatoptions' => [[
+                'action' => 'show',
+                'name'   => '明细',
+                'access' => $this->access['show']
+            ],[
+                'action' => 'invalidEdit',
+                'name'   => '作废',
+                'access' => $this->access['invalidEdit']
+            ]],
             'label' => ' ',
             'width' => 100,
             'align' => 'center',
@@ -509,9 +514,11 @@ class PurchaseController extends DefaultController
         ],[
             'name'  => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'show' => '明细'
-            ],
+            'formatoptions' => [[
+                'action' => 'show',
+                'name'   => '明细',
+                'access' => $this->access['show']
+            ]],
             'label' => ' ',
             'width' => 80,
             'align' => 'center',
@@ -648,6 +655,48 @@ class PurchaseController extends DefaultController
             'lines' => $lines,
             'trash' => $gets['trash'],
         ]);
+    }
+
+    // 打印
+    public function printAction()
+    {
+        $id   = Input::get('id');
+        $node = Input::get('node', 'stock.purchase');
+        $size = Input::get('size', 'a4');
+
+        $row = Stock::where('stock.id', $id)
+        ->leftJoin('store', 'store.id', '=', 'stock.store_id')
+        ->leftJoin('user', 'user.id', '=', 'stock.user_id')
+        ->leftJoin('supplier', 'supplier.id', '=', 'stock.supplier_id')
+        ->first([
+            'stock.*',
+            'store.name as store_name',
+            'user.name as user_name',
+            'supplier.name as supplier_name'
+        ])->toArray();
+
+        $row['purchase_line'] = StockLine::orderBy('stock_line.id', 'desc')
+        ->leftJoin('stock', 'stock.id', '=', 'stock_line.stock_id')
+        ->leftJoin('product', 'product.id', '=', 'stock_line.product_id')
+        ->leftJoin('warehouse', 'warehouse.id', '=', 'stock_line.warehouse_id')
+        ->where('stock.id', $id)
+        ->select([
+            'stock_line.*',
+            'stock.sn',
+            'stock.date',
+            'warehouse.name as warehouse_name',
+            'product.barcode as product_barcode',
+            'product.name as product_name',
+            'product.spec as product_spec',
+        ])->get()->toArray();
+
+        $filename = 'prints/'.$node.'.'.$size.'.xlsx';
+        $file = upload_path($filename);
+        if (is_file($file)) {
+            printExcel($file, $row, $size, 'html');
+        } else {
+            echo '<div style="margin:0 auto;">无打印模板</div>';
+        }
     }
 
     // 作废单据

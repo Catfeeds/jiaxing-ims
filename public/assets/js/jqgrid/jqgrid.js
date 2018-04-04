@@ -228,7 +228,9 @@ $.extend($.fn.fmatter, {
         var formatoptions = options.colModel.formatoptions;
         var link = [];
         $.each(formatoptions, function(i, row) {
-            link.push('<a data-toggle="actionLink" class="option" data-action="'+ i +'" data-id="'+ rowdata.id +'" href="javascript:actionLink(\''+i+'\','+ rowdata.id +');">'+ row +'</a>');
+            if (row.access > 0) {
+                link.push('<a data-toggle="actionLink" class="option" data-action="'+ row.action +'" data-id="'+ rowdata.id +'" href="javascript:actionLink(\''+row.action+'\','+ rowdata.id +');">'+ row.name +'</a>');
+            }
         });
         return link.join(' ');
     }

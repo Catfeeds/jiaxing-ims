@@ -1041,6 +1041,156 @@ function writeExcel($columns, $data, $filename)
     exit;
 }
 
+/** 生成打印格式 */
+function printExcel($file, $data, $size = 'a4', $type = 'html')
+{
+    $sizes = [
+        'a4' => ['a4', '3mm 6mm 3mm 6mm', '210mm'],
+        's'  => ['100mm 160mm', '1mm 3mm', '100mm'],
+    ];
+    $size = $sizes[$size];
+
+    // 打印时间
+    $data['print_time'] = date('Y-m-d H:i');
+
+    $spreadsheet = PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+    // 读取第一個工作表
+    $sheet = $spreadsheet->getSheet(0);
+    // 取得总行数
+    $highestRow = $sheet->getHighestRow();
+    // 取得总列数
+    $highestColumm = $sheet->getHighestColumn();
+    $highestColumn = PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumm);
+    
+    $sheet->getPageMargins()
+    ->setTop(0)
+    ->setBottom(0)
+    ->setLeft(0)
+    ->setRight(0);
+
+    // 获取全部合并数据
+    $mergeCells = $sheet->getMergeCells();
+    $merges = [];
+    foreach ($mergeCells as $row) {
+        $res = PhpOffice\PhpSpreadsheet\Cell\Coordinate::getRangeBoundaries($row);
+        $merges[$res[0][1]][] = $row;
+    }
+
+    for ($row = 1; $row < $highestRow; $row++) {
+        // 获取行第一列
+
+        $v = $sheet->getCellByColumnAndRow(1, $row)->getValue();
+
+        // 检查是否是列表
+        if (stripos($v, '_line') > 0) {
+            // 获取列表数据
+            $items = (array)$data[$v];
+
+            // 列表数量
+            $count = count($items);
+
+            $_start = $row + 1;
+
+            // 取消删除行的合并规则
+            $_merges = $merges[$row];
+            if ($_merges) {
+                foreach ($_merges as $_merge) {
+                    $sheet->unmergeCells($_merge);
+                }
+            }
+
+            $columns = [];
+            for ($col = 1; $col <= $highestColumn; $col++) {
+                $v = $sheet->getCellByColumnAndRow($col, $_start)->getValue();
+                if (preg_match('/{(.+)}/i', $v, $match)) {
+                    $match[2] = $v;
+                    $columns[$col] = $match;
+                } else {
+                    $columns[$col] = ['', '', $v];
+                }
+            }
+
+            // 删除行
+            $sheet->removeRow($row, 1);
+            // 隐藏列表行
+            // $sheet->getRowDimension($_start - 1)->setVisible(false);
+
+            if ($count > 1) {
+                $sheet->insertNewRowBefore($_start, $count - 1);
+            }
+            foreach ($items as $k => $item) {
+                $item['k'] = $k + 1;
+                for ($col = 1; $col <= $highestColumn; $col++) {
+                    $column = $columns[$col];
+                    if ($column[0]) {
+                        $v = str_replace($column[0], $item[$column[1]], $column[2]);
+                        $sheet->setCellValueByColumnAndRow($col, $row, $v);
+                    }
+                }
+                // 以模板行规则重新合并
+                if ($count > 1) {
+                    $_merges = $merges[$_start];
+                    if ($_merges) {
+                        foreach ($_merges as $_merge) {
+                            $sheet->mergeCells($_merge);
+                        }
+                    }
+                }
+                
+                $row = $row + 1;
+                $highestRow = $highestRow + 1;
+            }
+
+            $row = $row - 1;
+            $highestRow = $highestRow - 1;
+        } else {
+            // 普通字段
+            for ($col = 1; $col <= $highestColumn; $col++) {
+                $v = $sheet->getCellByColumnAndRow($col, $row)->getValue();
+                if (preg_match('/{(.+)}/i', $v, $match)) {
+                    $v = str_replace($match[0], $data[$match[1]], $v);
+                    $sheet->setCellValueByColumnAndRow($col, $row, $v);
+                }
+            }
+        }
+    }
+
+    if ($type == 'html') {
+        $writer = new PhpOffice\PhpSpreadsheet\Writer\Html($spreadsheet);
+        // 设置css内联形式渲染
+        $writer->setUseInlineCss(true);
+        $writer->setPreCalculateFormulas(false);
+        $e[] = $writer->generateHTMLHeader();
+        $e[] = $writer->generateStyles(true);
+        $e[] = '<style type="text/css">
+        @media screen {
+            * { margin: 0 auto; }
+            html { background-color:transparent; }
+            .print-template { background-color:#fff; width: '.$size[2].'; padding:'.$size[1].'; }
+        }
+        @media print {
+            html { margin: '.$size[1].'; }
+            @page { margin: 0; size: '.$size[0].'; }
+        }
+        </style>';
+        $e[] = '<div class="print-template">';
+        $e[] = $writer->generateSheetData();
+        $e[] = '</div>';
+        $e[] = $writer->generateHTMLFooter();
+        echo join('', $e);
+    }
+
+    if ($type == 'pdf') {
+        PhpOffice\PhpSpreadsheet\IOFactory::registerWriter('Pdf', Excel\Writer\Pdf\Mpdf::class);
+        $writer = PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Pdf');
+        $writer->setPreCalculateFormulas(false);
+        header('Content-type: application/pdf');
+        $writer->save('php://output');
+    }
+    exit;
+}
+
+
 // 判断客户端类型
 function isMobile()
 {

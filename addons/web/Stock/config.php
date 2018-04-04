@@ -144,6 +144,9 @@ return [
                 "create" => [
                     "name" => "新建"
                 ],
+                "print" => [
+                    "name" => "打印"
+                ],
                 "invalid" => [
                     "name" => "作废"
                 ],
@@ -172,6 +175,9 @@ return [
                 ],
                 "create" => [
                     "name" => "新建"
+                ],
+                "print" => [
+                    "name" => "打印"
                 ],
                 "invalid" => [
                     "name" => "作废"
@@ -237,6 +243,9 @@ return [
                 "create" => [
                     "name" => "新建"
                 ],
+                "print" => [
+                    "name" => "打印"
+                ],
                 "invalid" => [
                     "name" => "作废"
                 ],
@@ -280,6 +289,9 @@ return [
                 "create" => [
                     "name" => "新建"
                 ],
+                "print" => [
+                    "name" => "打印"
+                ],
                 "invalid" => [
                     "name" => "作废"
                 ],
@@ -308,6 +320,9 @@ return [
                 ],
                 "create" => [
                     "name" => "新建"
+                ],
+                "print" => [
+                    "name" => "打印"
                 ],
                 "invalid" => [
                     "name" => "作废"

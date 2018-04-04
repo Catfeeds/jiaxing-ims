@@ -47,7 +47,7 @@ legend,
 .uploader-size,
 .panel-heading,
 .btn {
-  font-family: "Helvetica Neue",Helvetica,Arial,"Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei UI","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif; 
+  font-family: "Helvetica Neue",Helvetica,Arial,"Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei UI","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
 }
 
 table,table.workflow{border-collapse:collapse}
@@ -608,7 +608,7 @@ a.label { color: #fff; }
     border-spacing: 0;
     table-layout: fixed;
 }
-  
+
 .hbox .col {
     display: table-cell;
     float: none;
@@ -824,7 +824,7 @@ a.label { color: #fff; }
     border-top: 0 !important;
 }
 
-/** 
+/**
  * 表单样式修改
  */
 .table>thead>tr>th {
@@ -864,7 +864,7 @@ a.label { color: #fff; }
 .table-show > tbody > tr:first-child > td {
     border-top: 0 !important;
 }
-  
+
 .table.table-model > tbody > tr:first-child > th,
 .table.table-model > tbody > tr:first-child > td {
     border-top: 0 !important;
@@ -885,7 +885,7 @@ a.label { color: #fff; }
 
 .form-wrapper {
     margin: 0 auto;
-    max-width: 880px; 
+    max-width: 880px;
 }
 .form-wrapper td {
     vertical-align: middle !important;
@@ -941,7 +941,7 @@ a.label { color: #fff; }
     white-space: normal !important;
 }
 
-.input-required { 
+.input-required {
     background-color: #FFFFE6 !important;
 }
 
@@ -972,7 +972,7 @@ a.label { color: #fff; }
 }
 
 /**
- * bootstrap table 样式定义 
+ * bootstrap table 样式定义
  */
 .fixed-table-container { border-radius: 0px; }
 
@@ -991,8 +991,8 @@ a.label { color: #fff; }
 #goods img {
     max-width: 680px;
     height:400px;
-    padding:5px; 
-    background:#fff; 
+    padding:5px;
+    background:#fff;
     border:1px solid #ccc;
 }
 
@@ -1030,17 +1030,17 @@ a.label { color: #fff; }
     background-color: #0e90d2;
 }
 
-.form-control, 
-.btn, 
+.form-control,
+.btn,
 .panel,
 .panel-heading,
-.nav-tabs a, 
-.pagination, 
-.pagination span, 
-.pagination a, 
-.dropdown-menu, 
-.modal-content, 
-.app-title, 
+.nav-tabs a,
+.pagination,
+.pagination span,
+.pagination a,
+.dropdown-menu,
+.modal-content,
+.app-title,
 .alert {
     border-radius: 0 !important;
 }
@@ -1342,7 +1342,7 @@ border: 1px solid #ddd;
     font-weight: 700;
 }
 
-.panel-form-show .control-table { 
+.panel-form-show .control-table {
     font-weight: 400;
 }
 

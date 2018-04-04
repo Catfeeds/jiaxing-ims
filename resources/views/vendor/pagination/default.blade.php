@@ -15,7 +15,7 @@ $page[] = '</ul></li>';
 
     {{join("\n", $page)}}
 
-    
+
 
     {{-- Previous Page Link --}}
     @if ($paginator->onFirstPage())
@@ -53,4 +53,3 @@ $page[] = '</ul></li>';
     <li><span>共 {{$paginator->total()}} 条记录</span></li>
 
 </ul>
-

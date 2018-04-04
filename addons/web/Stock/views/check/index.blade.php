@@ -3,11 +3,7 @@
     @include('tabs', ['tabKey' => 'stock.check'])
 
     <div class="wrapper-sm">
-        <div class="btn-group">
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('print');"><i class="fa fa-print"></i> 打印</a>
-        </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
-    
     </div>
         
     <div style="display:none;">

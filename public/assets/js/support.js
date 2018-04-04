@@ -442,7 +442,7 @@ function formDialog(options)
                             return;
                         }
                     }
-   
+
                     $.post(action, query, function(res) {
     
                         if (typeof options.onSuccess === 'function') {

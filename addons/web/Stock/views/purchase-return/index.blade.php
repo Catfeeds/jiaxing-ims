@@ -4,7 +4,15 @@
 
     <div class="wrapper-sm">
         <div class="btn-group">
-            <a class="btn btn-sm btn-default" href="javascript:actionLink('print');"><i class="fa fa-print"></i> 打印</a>
+            @if(isset($access['print']))
+            <div class="btn-group">
+                <button class="btn btn-sm btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-print"></i> 打印 <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li><a href="javascript:actionLink('print', 'a4');">A4</a></li>
+                    <li><a href="javascript:actionLink('print', 's');">小票</a></li>
+                </ul>
+            </div>
+            @endif
         </div>
         <a class="btn btn-sm btn-default" href="javascript:actionLink('filter');"> <i class="fa fa-filter"></i> 过滤</a>
     
@@ -107,6 +115,16 @@ function actionLink(action, id) {
 
     if(action == 'show') {
         showDialog = viewBox('show','采购明细', app.url(routes.show, {id: id}), 'lg');
+        return;
+    }
+
+    if(action == 'print') {
+        var selections = $table.jqGrid('getSelections');
+        if(selections.length) {
+            window.open(app.url('stock/purchase-return/print', {size: id, id: selections[0].id}));
+        } else {
+            $.toastr('error', '最少选择一行记录。', '错误');
+        }
         return;
     }
 

@@ -148,10 +148,15 @@ class TransferController extends DefaultController
         ],[
             'name'  => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'show'        => '明细',
-                'invalidEdit' => '作废'
-            ],
+            'formatoptions' => [[
+                'action' => 'show',
+                'name'   => '明细',
+                'access' => $this->access['show']
+            ],[
+                'action' => 'invalidEdit',
+                'name'   => '作废',
+                'access' => $this->access['invalidEdit']
+            ]],
             'label' => ' ',
             'width' => 100,
             'align' => 'center',
@@ -261,10 +266,15 @@ class TransferController extends DefaultController
         ],[
             'name'  => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'show'        => '明细',
-                'invalidEdit' => '作废'
-            ],
+            'formatoptions' => [[
+                'action' => 'show',
+                'name'   => '明细',
+                'access' => $this->access['show']
+            ],[
+                'action' => 'invalidEdit',
+                'name'   => '作废',
+                'access' => $this->access['invalidEdit']
+            ]],
             'label' => ' ',
             'width' => 100,
             'align' => 'center',
@@ -524,9 +534,11 @@ class TransferController extends DefaultController
         ],[
             'name'  => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'show' => '明细',
-            ],
+            'formatoptions' => [[
+                'action' => 'show',
+                'name'   => '明细',
+                'access' => $this->access['show']
+            ]],
             'label' => ' ',
             'width' => 80,
             'align' => 'center',

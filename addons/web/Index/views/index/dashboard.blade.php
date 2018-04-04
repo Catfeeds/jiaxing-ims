@@ -18,7 +18,7 @@
 .row-sm > div { padding-left: 8px; padding-right: 8px; }
 .row-sm > div > .panel {
     margin-bottom: 16px !important;
-    text-align: center; 
+    text-align: center;
 }
 .row-todo .panel { padding-bottom: 10px; position: relative; }
 .todo-logo { color: #fff; padding-top:20px; position:absolute; top:0; bottom:0; left:0; width: 80px; }

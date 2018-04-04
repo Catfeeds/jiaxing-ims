@@ -228,9 +228,11 @@ class StockController extends DefaultController
         ],[
             'name'    => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'edit' => '修改成本',
-            ],
+            'formatoptions' => [[
+                'action' => 'edit',
+                'name'   => '修改成本',
+                'access' => $this->access['edit']
+            ]],
             'label'   => '&nbsp;',
             'width'   => 100,
             'align'   => 'center',
@@ -363,6 +365,11 @@ class StockController extends DefaultController
             'formatoptions' => [
                 'edit' => '设置预警',
             ],
+            'formatoptions' => [[
+                'action' => 'edit',
+                'name'   => '设备预警',
+                'access' => $this->access['edit']
+            ]],
             'label'   => '&nbsp;',
             'width'   => 100,
             'align'   => 'center',

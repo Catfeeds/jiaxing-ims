@@ -22,6 +22,26 @@ return [
                 ]
             ]
         ],
+        "print" => [
+            "name" => "打印模板",
+            "actions" => [
+                "index" => [
+                    "name" => "模板显示"
+                ],
+                "create" => [
+                    "name" => "更新模板"
+                ],
+                "export" => [
+                    "name" => "导出模板"
+                ],
+                "param" => [
+                    "name" => "模板参数"
+                ],
+                "demo" => [
+                    "name" => "演示模板"
+                ]
+            ]
+        ],
         "store" => [
             "name" => "门店",
             "actions" => [

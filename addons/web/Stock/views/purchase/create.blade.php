@@ -82,6 +82,7 @@
 <script type="text/javascript">
 
 var t = null;
+var access  = {{json_encode($access)}};
 var columns = {{json_encode($columns)}};
 var receivable_money = 0.00;
 

@@ -80,6 +80,11 @@ class CheckController extends DefaultController
     {
         $stores = DB::table('store')->get(['id', 'name as text']);
 
+        $actionLinks = [
+            'show'        => '明细',
+            'invalidEdit' => '作废'
+        ];
+
         $columns = [[
             'name'     => 'sn',
             'index'    => 'stock.sn',
@@ -152,9 +157,15 @@ class CheckController extends DefaultController
         ],[
             'name'  => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'show'        => '明细',
-                'invalidEdit' => '作废'
+            'formatoptions' => [[
+                    'action' => 'show',
+                    'name'   => '明细',
+                    'access' => $this->access['show']
+                ],[
+                    'action' => 'invalidEdit',
+                    'name'   => '作废',
+                    'access' => $this->access['invalidEdit']
+                ],
             ],
             'label' => ' ',
             'width' => 100,
@@ -403,9 +414,11 @@ class CheckController extends DefaultController
         ],[
             'name'  => 'action',
             'formatter' => 'actionLink',
-            'formatoptions' => [
-                'show' => '明细',
-            ],
+            'formatoptions' => [[
+                'action' => 'show',
+                'name'   => '明细',
+                'access' => $this->access['show']
+            ]],
             'label' => ' ',
             'width' => 80,
             'align' => 'center',
